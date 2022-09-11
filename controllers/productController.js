@@ -2,7 +2,8 @@ const Product = require("../models/product");
 const Joi = require("joi");
 const fs = require("fs");
 const formidable = require("formidable");
-const _ = require("lodash")
+const _ = require("lodash");
+const { listenerCount } = require("process");
 
 exports.createProduct = (req, res) => {
   let form = new formidable.IncomingForm();
@@ -111,7 +112,7 @@ exports.updateProduct = (req, res) => {
 
     let product = req.product;
 
-    product = _.extend(product,fields)
+    product = _.extend(product, fields);
 
     if (files.photo) {
       if (files.photo.size > Math.pow(10, 6)) {
@@ -153,31 +154,95 @@ exports.updateProduct = (req, res) => {
   });
 };
 
-
-exports.fetchAllProduct = (req,res) => {
-
-  const sortBy = req.query.sortBy ? req.query.sortBy : '_id';
-  const order = req.query.order ? req.query.order : 'asc';
+exports.fetchAllProduct = (req, res) => {
+  const sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  const order = req.query.order ? req.query.order : "asc";
   const limit = req.query.limit ? req.query.limit : 6;
 
   Product.find()
-        .select('-photo')
-        .populate('category')
-        .sort([[sortBy, order]])
-        .limit(limit)
-        .limit(limit)
-        .exec((error, products ) => {
+    .select("-photo")
+    .populate("category")
+    .sort([[sortBy, order]])
+    .limit(limit)
+    .exec((error, products) => {
+      if (error) {
+        return res.status(404).json({
+          error: "Prodyc not founf",
+        });
+      }
 
-          if(error){
-            return res.status(404).json({
-              error: 'Prodyc not founf'
-            })
-          }
+      res.json({
+        products,
+      });
+    });
+};
 
-          res.json({
-            products
-          })
+exports.relatedProduct = (req, res) => {
+  let limit = req.query.limit ? parseInt(req.query.limit) : 6;
 
-        })
+  Product.find({
+    category: req.product.category,
+    _id: { $ne: req.product._id },
+  })
+    .limit(limit)
+    .select("-photo")
+    .populate("category", "_id name")
+    .exec((err, products) => {
+      if (err) {
+        return res.status(404).json({
+          error: "Products not found !",
+        });
+      }
 
-}
+      res.json({
+        products,
+      });
+    });
+};
+
+exports.searchProdcut = (req, res) => {
+  let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
+  let order = req.query.order ? req.query.order : "asc";
+  let limit = req.query.limit ? req.query.limit : 6;
+  let skip = parseInt(req.body.skip);
+  let findArgs = {};
+
+  for (let key in req.body.filters) {
+    if (req.body.filters[key].length > 0) {
+      if (key === "price") {
+        findArgs[key] = {
+          $gte: req.body.filters[key][0],
+          $lte: req.body.filters[key][1],
+        };
+      }
+    }
+  }
+
+  Product.find(findArgs)
+    .select("-photo")
+    .populate("category")
+    .sort([[sortBy, order]])
+    .limit(limit)
+    .skip(skip)
+    .exec((error, products) => {
+      if (error) {
+        return res.status(404).json({
+          error: "Prodyc not founf",
+        });
+      }
+
+      res.json({
+        products,
+      });
+    });
+};
+
+exports.getProductPhoto = (req, res) => {
+  const { data, contentType } = req.product.photo;
+
+  if (data) {
+    res.set({ "Content-Type": contentType });
+
+    return res.send(data);
+  }
+};

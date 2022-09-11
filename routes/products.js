@@ -6,13 +6,19 @@ const {
   showSingleProduct,
   removeProduct,
   updateProduct,
-  fetchAllProduct
+  fetchAllProduct,
+  relatedProduct,
+  searchProdcut,
+  getProductPhoto
 } = require("../controllers/productController");
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { productValidator } = require("../middlewares/productValidator");
 const { userById } = require("../middlewares/user");
 
 router.get("/", fetchAllProduct);
+router.get("/related/:productId", relatedProduct);
+router.get("/search", searchProdcut);
+router.get("/photo/:productId", getProductPhoto);
 router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], createProduct);
 router.get("/:productId", showSingleProduct);
 router.delete(

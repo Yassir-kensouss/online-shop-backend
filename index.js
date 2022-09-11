@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const expressValidator = require('express-validator')
 const cookieParser = require('cookie-parser')
+const cors = require('cors')
 
 
 //Import Routes
@@ -23,6 +24,7 @@ mongoose.connect(process.env.DATABASE)
 app.use(express.json())
 app.use(expressValidator())
 app.use(cookieParser())
+app.use(cors())
 
 //Routes Middleware
 app.use('/api', authRoutes);
