@@ -1,13 +1,11 @@
 const User = require("../models/user");
+const Token = require("../models/token");
+const sendEmail = require("../utils/sendEmail");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(
-  "128474420027-3cmf1ufttlh5ff8nfniebuqjtm4skard.apps.googleusercontent.com"
-);
-
-exports.salam = (req, res) => {
-  res.send("app is in /");
-};
+const crypto = require("crypto");
+const Joi = require("joi");
+const client = new OAuth2Client(process.env.CLIENT_ID);
 
 exports.signup = (req, res) => {
   const user = new User(req.body);
@@ -93,4 +91,56 @@ exports.signout = (req, res) => {
   res.send({
     message: "User signed out",
   });
+};
+
+exports.resetPassword = async (req, res) => {
+  try {
+    console.log("det", req.body.email);
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(400).send("User with this email not exist");
+
+    let token = await Token.findOne({ userId: user._id });
+
+    if (!token) {
+      token = new Token({
+        userId: user._id,
+        token: crypto.randomBytes(32).toString("hex"),
+      }).save();
+    }
+
+    const link = `http://localhost:3000/update-password/${user._id}/${token.token}`;
+    await sendEmail(user.email, "Password reset", link);
+
+    res.send("password reset link sent to your email account.");
+  } catch (error) {
+    res.send("An error occured");
+    console.log(error);
+  }
+};
+
+exports.updatePassword = async (req, res) => {
+  console.log("====", req.body);
+  try {
+    const user = await User.findById(req.params.userId);
+
+    if (!user) {
+      return res.status(400).send("Invalid link or expired");
+    }
+
+    const token = await Token.findOne({
+      userId: user._id,
+      token: req.params.token,
+    });
+
+    if (!token) return res.status(400).send("Invalid link or expired");
+
+    user.password = req.body.password;
+    await user.save();
+    await token.delete();
+
+    res.send("password reset successfully");
+  } catch (error) {
+    res.send("Somthing went wrong!");
+    console.log(error);
+  }
 };
