@@ -10,90 +10,99 @@ exports.createCategory = (req, res) => {
       });
     }
 
-    res.send({category})
+    res.send({ category });
   });
 };
 
-exports.getCategory = (req,res,next,id) => {
+exports.getCategory = (req, res, next, id) => {
+  Category.findById(id).exec((err, category) => {
+    if (err || !category) {
+      return res.status(404).json({
+        error: "Product Not found",
+      });
+    }
 
-    Category.findById(id).exec((err, category) => {
+    req.category = category;
 
-        if(err || !category){
-            return res.status(404).json({
-                error: 'Product Not found'
-            })
-        }
+    next();
+  });
+};
 
-        req.category = category;
-
-        next()
-
-    })
-
-}
-
-exports.getSingleCategory = (req,res) => {
-
+exports.getSingleCategory = (req, res) => {
   res.send({
-    category: req.category
-  })
+    category: req.category,
+  });
+};
 
-}
-
-exports.updateCategory = (req,res) => {
-
+exports.updateCategory = (req, res) => {
   let category = req.category;
 
   category.name = req.body.name;
 
-  category.save((err,category) => {
-
-    if(err) {
+  category.save((err, category) => {
+    if (err) {
       return res.status(400).json({
-        error: 'Bad request'
-      })
+        error: "Bad request",
+      });
     }
 
     res.json({
-      category
-    })
+      category,
+    });
+  });
+};
 
-  })
+// Delete a single category
 
-}
-
-exports.deleteCategory = (req,res) => {
+exports.deleteCategory = (req, res) => {
   let category = req.category;
 
   category.remove((err, category) => {
-
-    if(err){
+    if (err) {
       return res.status(404).json({
-        error: 'Category not found'
-      })
+        error: "Category not found",
+      });
     }
 
     res.status(204).json({
-      category
-    })
+      category,
+    });
+  });
+};
 
-  })
-}
+// Delete multiple categories
 
-exports.fetchAllCategories = (req,res) => {
+exports.deleteMultiCategories = (req, res) => {
+  const ids = req.body.ids;
 
-  Category.find().exec((err,categories) => {
+  Category.deleteMany(
+    {
+      _id: ids,
+    },
+    (err, result) => {
+      if (err) {
+        res.status(400).json({
+          error: err
+        });
+      } else {
+        res.json({
+          result
+        });
+      }
+    }
+  );
+};
 
-    if(err){
+exports.fetchAllCategories = (req, res) => {
+  Category.find().exec((err, categories) => {
+    if (err) {
       return res.status(500).json({
-        error: err
-      })
+        error: err,
+      });
     }
 
     res.json({
-      categories
-    })
-
-  })
-
-}
+      categories,
+    });
+  });
+};
