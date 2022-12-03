@@ -1,3 +1,4 @@
+const formidable = require("formidable");
 const Category = require("../models/category");
 
 exports.createCategory = (req, res) => {
@@ -93,16 +94,38 @@ exports.deleteMultiCategories = (req, res) => {
   );
 };
 
+
 exports.fetchAllCategories = (req, res) => {
-  Category.find().exec((err, categories) => {
+  const perPage = 2;
+  const page = Math.max(0,req.query.page);
+  console.log('page', page)
+  Category.find()
+  .limit(perPage)
+  .skip(perPage * page)
+  .exec((err, categories) => {
     if (err) {
       return res.status(500).json({
         error: err,
       });
     }
-
     res.json({
       categories,
     });
   });
 };
+
+// Post multiple categories
+exports.postMultipleCategories = (req,res) => {
+
+  Category.insertMany(req.body,(err,cats) => {
+    if(err){
+      return res.status(400).json({
+        error: err
+      })
+    }
+
+    res.json({
+      categories: cats,
+    })
+  })
+}
