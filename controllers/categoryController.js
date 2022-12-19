@@ -96,22 +96,40 @@ exports.deleteMultiCategories = (req, res) => {
 
 
 exports.fetchAllCategories = (req, res) => {
-  const perPage = 2;
+  const perPage = 10;
   const page = Math.max(0,req.query.page);
-  console.log('page', page)
-  Category.find()
-  .limit(perPage)
-  .skip(perPage * page)
-  .exec((err, categories) => {
-    if (err) {
-      return res.status(500).json({
-        error: err,
-      });
-    }
-    res.json({
-      categories,
-    });
-  });
+  const userId = req.params.userId;
+  const role = req.profile?.role;
+  const query = role == 1 ? {} : {user: userId}
+
+    Category.countDocuments({},(err, count) => {
+      if(err){
+        return res.status(400).json({
+          error: err
+        })
+      }
+      else{
+        Category.find(query)
+        .limit(perPage)
+        .skip(perPage * page)
+        .sort({createdAt:'desc'})
+        .exec((err, categories) => {
+          if (err) {
+            return res.status(500).json({
+              error: err,
+            });
+          }
+          res.json({
+            categories,
+            count: count,
+            perPage:perPage,
+          });
+        });
+      }
+    })
+  
+
+
 };
 
 // Post multiple categories
@@ -128,4 +146,33 @@ exports.postMultipleCategories = (req,res) => {
       categories: cats,
     })
   })
+}
+
+// Search category
+
+exports.searchCategory = (req,res) => {
+
+  const perPage = 10;
+  const page = Math.max(0,req.query.page);
+  const searchValue = req.query.searchValue;
+  const matching = new RegExp(searchValue,'i');
+
+  Category
+    .find({name: {$regex: matching}})
+    .limit(perPage)
+    .skip(perPage * page)
+    .exec((err, categories) => {
+      if(err){
+        res.status(400).json({
+          error: 'Categories not found'
+        })
+      }
+
+      res.json({
+        categories,
+        count: categories.length,
+        perPage:perPage,
+      })
+    })
+
 }
