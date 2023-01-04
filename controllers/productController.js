@@ -1,59 +1,69 @@
 const Product = require("../models/product");
+const File = require("../models/fileStorage");
+const { isValidateFile } = require("../utils/validateFileStorage");
 const Joi = require("joi");
 const fs = require("fs");
 const formidable = require("formidable");
 const _ = require("lodash");
-const { listenerCount } = require("process");
 
 exports.createProduct = (req, res) => {
-  let form = new formidable.IncomingForm();
 
-  form.keepExtensions = true;
-  form.multiples = true;
+  const validationSchema = Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string().min(0).max(2500),
+    shortDescription: Joi.string().min(0).max(2500),
+    price: Joi.number().required(),
+    oldPrice: Joi.number(),
+    sku: Joi.string(),
+    quantity: Joi.number().required(),
+    visibility: Joi.string(),
+    category: Joi.required(),
+  });
 
-  form.parse(req, (error, fields, files) => {
-    if (error) {
-      return res.status(400).json({
-        error: "Image could not upload",
-      });
-    }
+  const validationError = validationSchema.validate(req.body);
 
-    let product = new Product(fields);
+  if (validationError.error) {
+    return res.status(400).json({
+      error: validationError.error.details[0].message,
+    });
+  }
 
-    if (files.photo) {
-      if (files.photo.size > Math.pow(10, 6)) {
-        return res.json({
-          error: "Image should be less than 1MB",
-        });
-      }
+  const filesArr = [];
 
-      product.photo.data = fs.readFileSync(files.photo.filepath);
-      product.photo.contentType = files.photo.mimetype;
-    }
+  req.files.map(file => {
+    filesArr.push({
+      file: file.path,
+    });
+  });
 
-    const validationSchema = Joi.object({
-      name: Joi.string().required(),
-      description: Joi.string().min(0).max(2500),
-      price: Joi.number().required(),
-      quantity: Joi.number().required(),
-      category: Joi.required(),
+  const { errors, isValid } = isValidateFile(req.files);
+  if (errors.length > 0 && !isValid) {
+    return res.status(400).json({
+      errors,
+    });
+  }
+
+  File.insertMany(filesArr, (err, file) => {
+    let filesIds = [];
+
+    file.map(single => {
+      filesIds.push(single._id);
     });
 
-    const validationError = validationSchema.validate(fields);
+    const incomingData = {
+      ...req.body,
+      photos: filesIds,
+    };
 
-    if (validationError.error) {
-      return res.status(400).json({
-        error: validationError.error.details[0].message,
-      });
-    }
+    let product = new Product(incomingData);
 
     product.save((err, product) => {
       if (err) {
-        return res.status(400).json({
-          error: "Product not created",
+        res.status(400).json({
+          error: "Can not add new product",
         });
+        return;
       }
-
       res.json({
         product,
       });

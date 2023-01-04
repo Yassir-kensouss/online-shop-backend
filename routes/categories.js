@@ -9,7 +9,8 @@ const {
   fetchAllCategories,
   deleteMultiCategories,
   postMultipleCategories,
-  searchCategory
+  searchCategory,
+  fetchCategories
 } = require("../controllers/categoryController");
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { userById } = require("../middlewares/user");
@@ -26,6 +27,7 @@ router.delete("/:categoryId", [requireSignIn, isAuth, isAdmin], deleteCategory);
 router.post("/delete/multiple",[requireSignIn, isAuth, isAdmin],deleteMultiCategories);
 router.post("/multiple/create",postMultipleCategories);
 router.get("/categories/search", searchCategory);
+router.get("/categories/all", fetchCategories);
 
 router.param("categoryId", getCategory);
 router.param("userId", userById);

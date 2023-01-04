@@ -176,3 +176,21 @@ exports.searchCategory = (req,res) => {
     })
 
 }
+
+exports.fetchCategories = (req,res) => {
+  Category
+    .find()
+    .exec((err, categories) => {
+      if(err){
+        res.status(400).json({
+          error: 'Categories not found'
+        })
+      }
+
+      res.json({
+        categories,
+      })
+    })
+
+}
+

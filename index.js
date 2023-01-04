@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
 const productRoutes = require('./routes/products')
+const fileStorageRoutes = require('./routes/filesStorage')
 
 //Config App
 require('dotenv').config();
@@ -31,6 +32,7 @@ app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/product', productRoutes);
+app.use('/api/file-storage',fileStorageRoutes)
 
 
 const port = process.env.PORT || 3000; 
