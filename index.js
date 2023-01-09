@@ -22,10 +22,11 @@ mongoose.connect(process.env.DATABASE)
 .catch(() => console.log('not nonnect to the database !'))
 
 //Middlewares
-app.use(express.json())
+app.use(express.json({limit: '50mb'}))
 app.use(expressValidator())
 app.use(cookieParser())
 app.use(cors())
+app.use(express.urlencoded({limit: '50mb',extended: 'true'}))
 
 //Routes Middleware
 app.use('/api', authRoutes);

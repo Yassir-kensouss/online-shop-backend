@@ -11,12 +11,12 @@ const productSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      maxlength: 10000,
+      maxlength: 100000,
       require: true,
     },
     shortdescription: {
       type: String,
-      maxlength: 2000,
+      maxlength: 1000,
       require: true,
     },
     oldprice: {
@@ -25,25 +25,32 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       require: true,
+      max: 1000000,
     },
     sku: {
       type: String,
+      maxlength: 30,
     },
     visibility: {
       type: String,
     },
     quantity: {
       type: Number,
+      min: 0,
+      max: 500000,
+      required: true,
     },
     photos: [{
-      type: ObjectId,
-      ref: 'FileStorage',
-      require: true,
+      type: Object,
+      required: true
     }],
-    category: [{
+    categories: [{
       type: ObjectId,
       ref:'Category',
       require: true,
+    }],
+    tags: [{
+      type: String
     }],
   },
   { timestamps: true }

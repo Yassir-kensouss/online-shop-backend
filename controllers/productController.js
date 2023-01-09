@@ -5,19 +5,21 @@ const Joi = require("joi");
 const fs = require("fs");
 const formidable = require("formidable");
 const _ = require("lodash");
+const { cloudinary } = require("../utils/cloudinary");
 
-exports.createProduct = (req, res) => {
-
+exports.createProduct = async (req, res) => {
   const validationSchema = Joi.object({
-    name: Joi.string().required(),
-    description: Joi.string().min(0).max(2500),
-    shortDescription: Joi.string().min(0).max(2500),
-    price: Joi.number().required(),
-    oldPrice: Joi.number(),
-    sku: Joi.string(),
-    quantity: Joi.number().required(),
-    visibility: Joi.string(),
-    category: Joi.required(),
+    name: Joi.string().max(200).required(),
+    description: Joi.string().min(0).max(100000).allow(null),
+    shortDescription: Joi.string().min(0).max(1000).required(),
+    price: Joi.number().max(1000000).required(),
+    oldPrice: Joi.number().allow(null),
+    tags: Joi.array().items(Joi.string()),
+    sku: Joi.string().max(30).allow(null),
+    quantity: Joi.number().max(500000).required(),
+    visibility: Joi.string().allow(null),
+    categories: Joi.array().items(Joi.string()),
+    files: Joi.required(),
   });
 
   const validationError = validationSchema.validate(req.body);
@@ -28,47 +30,59 @@ exports.createProduct = (req, res) => {
     });
   }
 
-  const filesArr = [];
+  try {
+    const pictureFiles = req.body.files;
+    if (!pictureFiles) {
+      return res.status(400).json({
+        message: "No files attached",
+      });
+    }
 
-  req.files.map(file => {
-    filesArr.push({
-      file: file.path,
+    let multiplePicturesPromise = pictureFiles.map(picture => {
+      return cloudinary.uploader.upload(picture);
     });
-  });
 
-  const { errors, isValid } = isValidateFile(req.files);
-  if (errors.length > 0 && !isValid) {
-    return res.status(400).json({
-      errors,
+    let imagesResponse = await Promise.all(multiplePicturesPromise);
+    let formateRes = [];
+
+    imagesResponse.map(response => {
+      formateRes = [
+        ...formateRes,
+        {
+          url: response.secure_url,
+          mediaType: response.resource_type,
+          size: response.bytes,
+          width: response.width,
+          height: response.height,
+          format: response.format,
+        },
+      ];
+    });
+
+    let product = new Product({
+      ...req.body,
+      photos: formateRes
+    })
+
+    product.save((err, item) => {
+      if(err){
+        res.status(400).json({
+          error: err,
+        });
+        return
+      }
+
+      res.status(200).json({
+        product: item,
+      });
+      return 
+    })
+
+  } catch (error) {
+    return res.status(500).json({
+      message: "Something went wrong, Please try again",
     });
   }
-
-  File.insertMany(filesArr, (err, file) => {
-    let filesIds = [];
-
-    file.map(single => {
-      filesIds.push(single._id);
-    });
-
-    const incomingData = {
-      ...req.body,
-      photos: filesIds,
-    };
-
-    let product = new Product(incomingData);
-
-    product.save((err, product) => {
-      if (err) {
-        res.status(400).json({
-          error: "Can not add new product",
-        });
-        return;
-      }
-      res.json({
-        product,
-      });
-    });
-  });
 };
 
 exports.getSingleProduct = (req, res, next, id) => {

@@ -35,7 +35,7 @@ router.get("/", fetchAllProduct);
 router.get("/related/:productId", relatedProduct);
 router.get("/search", searchProdcut);
 router.get("/photo/:productId", getProductPhoto);
-router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], upload.array("file"), createProduct);
+router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], createProduct);
 router.get("/:productId", showSingleProduct);
 router.delete(
   "/:productId/:userId",
