@@ -8,8 +8,8 @@ const {
   updateProduct,
   fetchAllProduct,
   relatedProduct,
-  searchProdcut,
-  getProductPhoto
+  searchProduct,
+  scheduleProduct,
 } = require("../controllers/productController");
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { productValidator } = require("../middlewares/productValidator");
@@ -33,9 +33,9 @@ const upload = multer({ storage: storage });
 
 router.get("/", fetchAllProduct);
 router.get("/related/:productId", relatedProduct);
-router.get("/search", searchProdcut);
-router.get("/photo/:productId", getProductPhoto);
+router.get("/search", searchProduct);
 router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], createProduct);
+router.post("/schedule", scheduleProduct);
 router.get("/:productId", showSingleProduct);
 router.delete(
   "/:productId/:userId",

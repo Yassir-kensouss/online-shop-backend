@@ -1,11 +1,10 @@
 const Product = require("../models/product");
-const File = require("../models/fileStorage");
-const { isValidateFile } = require("../utils/validateFileStorage");
 const Joi = require("joi");
 const fs = require("fs");
 const formidable = require("formidable");
 const _ = require("lodash");
 const { cloudinary } = require("../utils/cloudinary");
+const {redisClient} = require('./redis');
 
 exports.createProduct = async (req, res) => {
   const validationSchema = Joi.object({
@@ -84,6 +83,24 @@ exports.createProduct = async (req, res) => {
     });
   }
 };
+
+exports.scheduleProduct = async (req, res) => {
+
+  // const {product} = req.body;
+
+  const taskData = {
+    taskType: "sms",
+    details: {
+      to: "Boss",
+      message: "Still working :)",
+    },
+  };
+
+  const scheduleProduct = await redisClient.zAdd('schedule', { score: 1, value: 'value' })
+
+  console.log('scheduleProduct', scheduleProduct);
+
+}
 
 exports.getSingleProduct = (req, res, next, id) => {
   Product.findById(id).exec((err, product) => {
@@ -184,14 +201,13 @@ exports.fetchAllProduct = (req, res) => {
   const limit = req.query.limit ? req.query.limit : 6;
 
   Product.find()
-    .select("-photo")
-    .populate("category")
+    .populate("categories")
     .sort([[sortBy, order]])
     .limit(limit)
     .exec((error, products) => {
       if (error) {
         return res.status(404).json({
-          error: "Prodyc not founf",
+          error: "Prodtc not found",
         });
       }
 
@@ -224,7 +240,7 @@ exports.relatedProduct = (req, res) => {
     });
 };
 
-exports.searchProdcut = (req, res) => {
+exports.searchProduct = (req, res) => {
   let sortBy = req.query.sortBy ? req.query.sortBy : "_id";
   let order = req.query.order ? req.query.order : "asc";
   let limit = req.query.limit ? req.query.limit : 6;
@@ -259,14 +275,4 @@ exports.searchProdcut = (req, res) => {
         products,
       });
     });
-};
-
-exports.getProductPhoto = (req, res) => {
-  const { data, contentType } = req.product.photo;
-
-  if (data) {
-    res.set({ "Content-Type": contentType });
-
-    return res.send(data);
-  }
 };
