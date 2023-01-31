@@ -10,6 +10,8 @@ const {
   relatedProduct,
   searchProduct,
   scheduleProduct,
+  duplicateProduct,
+  deleteMultipleProducts,
 } = require("../controllers/productController");
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { productValidator } = require("../middlewares/productValidator");
@@ -35,6 +37,7 @@ router.get("/", fetchAllProduct);
 router.get("/related/:productId", relatedProduct);
 router.get("/search", searchProduct);
 router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], createProduct);
+router.post("/duplicate/:userId", [requireSignIn, isAuth, isAdmin], duplicateProduct);
 router.post("/schedule", scheduleProduct);
 router.get("/:productId", showSingleProduct);
 router.delete(
@@ -42,6 +45,7 @@ router.delete(
   [requireSignIn, isAuth, isAdmin],
   removeProduct
 );
+router.post('/deleteMany/:userId', [requireSignIn, isAuth, isAdmin], deleteMultipleProducts)
 router.put("/:productId", updateProduct);
 
 router.param("productId", getSingleProduct);

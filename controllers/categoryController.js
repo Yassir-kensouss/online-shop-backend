@@ -78,7 +78,7 @@ exports.deleteMultiCategories = (req, res) => {
 
   Category.deleteMany(
     {
-      _id: ids,
+      _id: {$in: ids},
     },
     (err, result) => {
       if (err) {

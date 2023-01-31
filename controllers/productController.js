@@ -84,6 +84,27 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+exports.duplicateProduct = (req,res) => {
+
+  let product = new Product(req.body)
+
+  product.save((err, item) => {
+    if(err){
+      res.status(400).json({
+        error: err,
+      });
+      return
+    }
+
+    res.status(200).json({
+      message: 'Product Duplicated',
+      product: item,
+    });
+    return 
+  })
+
+}
+
 exports.scheduleProduct = async (req, res) => {
 
   // const {product} = req.body;
@@ -132,10 +153,31 @@ exports.removeProduct = (req, res) => {
       });
     }
 
-    res.status(204).json({
+    res.status(200).json({
       product,
+      message: 'You have successfully deleted the product'
     });
   });
+};
+
+exports.deleteMultipleProducts = (req, res) => {
+  const ids = req.body;
+
+  console.log('ids', ids)
+
+  Product.deleteMany({ _id: ids }, (err, result) => {
+    if (err) {
+      res.status(400).json({
+        message: err,
+      });
+    } else {
+      res.status(200).json({
+        message: `You have successfully deleted ${ids?.length} products`,
+        products: result,
+      });
+    }
+  });
+
 };
 
 exports.updateProduct = (req, res) => {
