@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema(
       maxlength: 100000,
       require: true,
     },
-    shortdescription: {
+    shortDescription: {
       type: String,
       maxlength: 1000,
       require: true,
@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema(
       required: true
     }],
     categories: [{
-      type: ObjectId,
+      type: Object,
       ref:'Category',
       require: true,
     }],

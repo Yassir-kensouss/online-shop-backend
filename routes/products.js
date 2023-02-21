@@ -12,6 +12,7 @@ const {
   scheduleProduct,
   duplicateProduct,
   deleteMultipleProducts,
+  searchProductByName,
 } = require("../controllers/productController");
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { productValidator } = require("../middlewares/productValidator");
@@ -36,6 +37,7 @@ const upload = multer({ storage: storage });
 router.get("/", fetchAllProduct);
 router.get("/related/:productId", relatedProduct);
 router.get("/search", searchProduct);
+router.get("/productsList", searchProductByName)
 router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], createProduct);
 router.post("/duplicate/:userId", [requireSignIn, isAuth, isAdmin], duplicateProduct);
 router.post("/schedule", scheduleProduct);
