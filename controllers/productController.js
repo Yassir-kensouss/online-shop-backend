@@ -1,7 +1,5 @@
 const Product = require("../models/product");
 const Joi = require("joi");
-const fs = require("fs");
-const formidable = require("formidable");
 const _ = require("lodash");
 const { cloudinary } = require("../utils/cloudinary");
 const { redisClient } = require("./redis");
@@ -160,8 +158,6 @@ exports.removeProduct = (req, res) => {
 
 exports.deleteMultipleProducts = (req, res) => {
   const ids = req.body;
-
-  console.log("ids", ids);
 
   Product.deleteMany({ _id: ids }, (err, result) => {
     if (err) {
@@ -414,7 +410,7 @@ exports.searchProduct = (req, res) => {
 exports.searchProductByName = async (req, res) => {
   const value = req.query.search;
   const limit = req.query.limit ? req.query.limit : 10;
-  const page = req.query.page ? req.query.page : 10;
+  const page = req.query.page ? req.query.page : 1;
   const skip = page * limit;
   const matching = new RegExp(value, "i");
   const total = await Product.countDocuments({ name: value });

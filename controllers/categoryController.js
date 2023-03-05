@@ -1,5 +1,6 @@
 const formidable = require("formidable");
 const Category = require("../models/category");
+const Product = require("../models/product");
 
 exports.createCategory = (req, res) => {
   const category = new Category(req.body);
@@ -95,12 +96,22 @@ exports.deleteMultiCategories = (req, res) => {
 };
 
 
-exports.fetchAllCategories = (req, res) => {
+exports.fetchAllCategories = async (req, res) => {
   const perPage = 10;
   const page = Math.max(0,req.query.page);
   const userId = req.params.userId;
   const role = req.profile?.role;
   const query = role == 1 ? {} : {user: userId}
+
+    const productGroup = await Product.aggregate([
+      { $unwind: "$categories" },
+      {
+        $group: {
+          _id: "$categories",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
 
     Category.countDocuments({},(err, count) => {
       if(err){
@@ -114,22 +125,28 @@ exports.fetchAllCategories = (req, res) => {
         .skip(perPage * page)
         .sort({createdAt:'desc'})
         .exec((err, categories) => {
+
+          const categoriesCount = categories.map(category => {
+            const count = productGroup.find(el => el._id.name.toString() === category.name.toString())?.count || 0;
+            return {
+              ...category.toObject(),
+              linkedProduct: count,
+            }
+          })
+
           if (err) {
             return res.status(500).json({
               error: err,
             });
           }
           res.json({
-            categories,
+            categories: categoriesCount,
             count: count,
-            perPage:perPage,
+            perPage:perPage
           });
         });
       }
     })
-  
-
-
 };
 
 // Post multiple categories

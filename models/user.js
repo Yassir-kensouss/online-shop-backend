@@ -36,6 +36,13 @@ const userSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
+    avatar: {
+      type: String,
+    },
+    state: {
+      type: String,
+      default: 'active'
+    }
   },
   { timestamps: true }
 );

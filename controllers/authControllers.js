@@ -5,23 +5,81 @@ const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const crypto = require("crypto");
 const Joi = require("joi");
+const { cloudinary } = require("../utils/cloudinary");
+const formidable = require("formidable");
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
-exports.signup = (req, res) => {
-  const user = new User(req.body);
+exports.signup = async (req, res) => {
 
-  user.save((err, user) => {
-    if (err) {
-      if (err.code === 11000) {
-        return res.status(400).json({
-          error: "Email is already exists",
-        });
-      }
-      return res.status(400).send(err);
+    const validationSchema = Joi.object({
+      name: Joi.string().max(20).required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+      state: Joi.string(),
+      about: Joi.string().optional(),
+      role: Joi.number(),
+      avatar: Joi.string().allow("").optional()
+    });
+  
+    const validationError = validationSchema.validate(req.body);
+  
+    if (validationError.error) {
+      return res.status(400).json({
+        error: validationError.error.details[0].message,
+      });
     }
 
-    res.send(user);
-  });
+    if (req.body.avatar) {
+      const file = req.body.avatar;
+      cloudinary.uploader.upload(file, (error, result) => {
+
+        if(error){
+          return res.status(400).json({
+            message: error
+          })
+        }
+
+        const user = new User({
+          avatar: result.secure_url,
+          ...req.body,
+        });
+
+        saveUser(user);
+      });
+    } else {
+      const user = new User({
+        ...req.body,
+      });
+
+      user.save((err, user) => {
+        if (err) {
+          if (err.code === 11000) {
+            return res.status(400).json({
+              error: "Email is already exists",
+            });
+          }
+          return res.status(400).send(err);
+        }
+
+        res.send(user);
+      });
+    }
+
+    const saveUser = user => {
+      user.save((err, user) => {
+        if (err) {
+          if (err.code === 11000) {
+            return res.status(400).json({
+              error: "Email is already exists",
+            });
+          }
+          return res.status(400).send(err);
+        }
+
+        res.send(user);
+      });
+    };
+  
 };
 
 exports.signin = (req, res) => {
@@ -61,29 +119,29 @@ exports.signin = (req, res) => {
   });
 };
 
-exports.signInWithGoogle = async (req, res) => {
-  const { token } = req.body;
+// exports.signInWithGoogle = async (req, res) => {
+//   const { token } = req.body;
 
-  const ticket = await client.verifyIdToken({
-    idToken: token,
-    audience: process.env.CLIENT_ID,
-  });
-  const { name, email, picture } = ticket.getPayload();
-  let user = await User.findOne({ email: email });
+//   const ticket = await client.verifyIdToken({
+//     idToken: token,
+//     audience: process.env.CLIENT_ID,
+//   });
+//   const { name, email, picture } = ticket.getPayload();
+//   let user = await User.findOne({ email: email });
 
-  if (!user) {
-    user = await new User({
-      email,
-      name,
-      password: "123098777",
-    });
+//   if (!user) {
+//     user = await new User({
+//       email,
+//       name,
+//       password: "123098777",
+//     });
 
-    await user.save();
-  }
+//     await user.save();
+//   }
 
-  res.status(201);
-  res.json({ token, user });
-};
+//   res.status(201);
+//   res.json({ token, user });
+// };
 
 exports.signout = (req, res) => {
   res.clearCookie("token");
