@@ -13,7 +13,7 @@ const { signUpValidaor } = require("../middlewares/userValidator");
 
 router.post("/signup", signup);
 router.post("/signin", signin);
-router.get("/signout", signout);
+router.get("/signout/:userId", signout);
 // router.post("/v1/auth/google", signInWithGoogle);
 router.post("/password-reset", resetPassword);
 router.post("/password-reset/:userId/:token", updatePassword);

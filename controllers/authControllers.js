@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const Joi = require("joi");
 const { cloudinary } = require("../utils/cloudinary");
 const formidable = require("formidable");
+const { saveUserHistory } = require("./userController");
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
 exports.signup = async (req, res) => {
@@ -18,7 +19,10 @@ exports.signup = async (req, res) => {
       state: Joi.string(),
       about: Joi.string().optional(),
       role: Joi.number(),
-      avatar: Joi.string().allow("").optional()
+      avatar: Joi.string().allow("").optional(),
+      address: Joi.object(),
+      phone: Joi.string(),
+      mobile: Joi.string(),
     });
   
     const validationError = validationSchema.validate(req.body);
@@ -107,6 +111,14 @@ exports.signin = (req, res) => {
 
     const { _id, name, email, role } = user;
 
+    saveUserHistory({
+      userId: _id,
+      userHistory: {
+        userActivity: 'user signed in',
+        date: new Date()
+      }
+    })
+    
     return res.send({
       token,
       user: {
@@ -116,6 +128,7 @@ exports.signin = (req, res) => {
         role,
       },
     });
+
   });
 };
 
@@ -146,9 +159,19 @@ exports.signin = (req, res) => {
 exports.signout = (req, res) => {
   res.clearCookie("token");
 
+  const userId = req.params.userId;
+
   res.send({
     message: "User signed out",
   });
+
+  saveUserHistory({
+    userId,
+    userHistory: {
+      userActivity: 'user signed out',
+      date: new Date()
+    }
+  })
 };
 
 exports.resetPassword = async (req, res) => {

@@ -2,6 +2,28 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const { v1: uuid } = require("uuid");
 
+const addressSchema = new mongoose.Schema({
+  country: {
+    type: String
+  },
+  city: {
+    type: String,
+    maxlength: 100
+  },
+  state: {
+    type: String,
+    maxlength: 100
+  },
+  zipCode: {
+    type: String,
+    maxlength: 50
+  },
+  address: {
+    type: String,
+    maxlength: 255
+  }
+})
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -42,6 +64,15 @@ const userSchema = new mongoose.Schema(
     state: {
       type: String,
       default: 'active'
+    },
+    address: {
+      type: addressSchema
+    },
+    phone: {
+      type: String
+    },
+    mobile: {
+      type: String
     }
   },
   { timestamps: true }

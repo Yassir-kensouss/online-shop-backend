@@ -132,7 +132,7 @@ exports.updateCustomerDetails = (req, res) => {
       .then(data => {
         res.json({
           message: "Customer updated successfully",
-          product: data,
+          customer: data,
         });
       })
       .catch(error => {
@@ -144,13 +144,12 @@ exports.updateCustomerDetails = (req, res) => {
   } else {
 
     User.findOneAndUpdate({_id: req.body.id},{$set: {
-      avatar: result.secure_url,
       ...req.body
     }},{new: true})
     .then(data => {
       res.json({
         message: "Customer updated successfully",
-        product: data,
+        customer: data,
       });
     })
     .catch(error => {
@@ -158,7 +157,21 @@ exports.updateCustomerDetails = (req, res) => {
     });
 
   }
-
-  
-
 }
+
+exports.saveUserHistory = async (userData) => {
+  User.findById(userData.userId).exec((error, user) => {
+    if (user) {
+      User.findOneAndUpdate(
+        { _id: userData.userId },
+        { $set: { history: [...user.history, userData.userHistory] } }
+      )
+        .then(data => {
+          console.log("history data", data);
+        })
+        .catch(error => {
+          console.log("error", error);
+        });
+    }
+  })
+};
