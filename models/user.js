@@ -4,7 +4,7 @@ const { v1: uuid } = require("uuid");
 
 const addressSchema = new mongoose.Schema({
   country: {
-    type: String
+    type: Object
   },
   city: {
     type: String,
