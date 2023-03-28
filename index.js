@@ -9,8 +9,11 @@ const cors = require('cors')
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const categoryRoutes = require('./routes/categories');
-const productRoutes = require('./routes/products')
-const fileStorageRoutes = require('./routes/filesStorage')
+const productRoutes = require('./routes/products');
+const cartRoutes = require('./routes/cart')
+const fileStorageRoutes = require('./routes/filesStorage');
+const braintreeRoutes = require('./routes/braintree');
+const orderRoutes = require('./routes/order');
 
 //Config App
 require('dotenv').config();
@@ -33,6 +36,9 @@ app.use('/api', authRoutes);
 app.use('/api', userRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/product', productRoutes);
+app.use('/api/braintree', braintreeRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/file-storage',fileStorageRoutes)
 
 

@@ -8,6 +8,7 @@ const Joi = require("joi");
 const { cloudinary } = require("../utils/cloudinary");
 const formidable = require("formidable");
 const { saveUserHistory } = require("./userController");
+const { USER_HISTORY_TYPES } = require("../config/constants");
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
 exports.signup = async (req, res) => {
@@ -114,7 +115,7 @@ exports.signin = (req, res) => {
     saveUserHistory({
       userId: _id,
       userHistory: {
-        userActivity: 'user signed in',
+        userActivity: USER_HISTORY_TYPES.USER_LOGGED_IN,
         date: new Date()
       }
     })
@@ -168,7 +169,7 @@ exports.signout = (req, res) => {
   saveUserHistory({
     userId,
     userHistory: {
-      userActivity: 'user signed out',
+      userActivity: USER_HISTORY_TYPES.USER_LOGGED_OUT,
       date: new Date()
     }
   })

@@ -99,9 +99,6 @@ exports.deleteMultiCategories = (req, res) => {
 exports.fetchAllCategories = async (req, res) => {
   const perPage = 10;
   const page = Math.max(0,req.query.page);
-  const userId = req.params.userId;
-  const role = req.profile?.role;
-  const query = role == 1 ? {} : {user: userId}
 
     const productGroup = await Product.aggregate([
       { $unwind: "$categories" },
@@ -120,7 +117,7 @@ exports.fetchAllCategories = async (req, res) => {
         })
       }
       else{
-        Category.find(query)
+        Category.find()
         .limit(perPage)
         .skip(perPage * page)
         .sort({createdAt:'desc'})

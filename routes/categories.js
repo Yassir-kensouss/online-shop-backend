@@ -15,7 +15,7 @@ const {
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { userById } = require("../middlewares/user");
 
-router.get("/:userId", fetchAllCategories);
+router.get("/fetchAll", fetchAllCategories);
 router.post(
   "/create/:userId",
   [requireSignIn, isAuth, isAdmin],
