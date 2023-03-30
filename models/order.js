@@ -18,7 +18,7 @@ const OrderSchema = new mongoose.Schema(
   {
     products: [CartItemSchema],
     transaction_id: {},
-    amount: { type: Number },
+    totalPrice: { type: Number },
     address: String,
     status: {
       type: String,
