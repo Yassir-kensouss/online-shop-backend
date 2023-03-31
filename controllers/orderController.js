@@ -76,3 +76,36 @@ exports.changeOrderStatus = (req, res) => {
     }
   );
 };
+
+
+exports.searchOrder = async (req, res) => {
+
+    const value = req.query.search;
+    const field = req.query.field;
+    const limit = req.query.limit ? req.query.limit : 10;
+    const page = req.query.page ? req.query.page : 1;
+    const skip = page * limit;
+    const matching = new RegExp(value, 'i');
+    const count = await Order.countDocuments();
+
+    const valToSearch = field === 'transaction_id' ? 'transaction_id' : 'user.name'
+    
+    Order.find({[valToSearch] : {$regex: matching}})
+    .skip(skip)
+    .limit(limit)
+    .exec((err, result) => {
+  
+      if(err) {
+        return res.status(400).json({
+          message: 'Something went wrong'
+        })
+      }
+  
+      res.json({
+        orders: result,
+        count
+      })
+  
+    })
+  
+  }
