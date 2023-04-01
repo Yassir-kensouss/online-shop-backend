@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 const { ObjectId } = mongoose.Schema;
+const moment = require('moment');
+const currentDate = moment().format('MM/DD/YY');
  
 const CartItemSchema = new mongoose.Schema(
   {
@@ -20,6 +22,10 @@ const OrderSchema = new mongoose.Schema(
     transaction_id: {},
     totalPrice: { type: Number },
     address: String,
+    date: {
+        type: Date,
+        default: currentDate
+    },
     status: {
       type: String,
       default: "Not processed",
