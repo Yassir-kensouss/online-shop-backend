@@ -33,8 +33,8 @@ exports.createOrder = (req, res) => {
 };
 
 exports.fetchOrders = async (req, res) => {
-  const limit = req.query.limit ? req.query.limit : 10; 
-  const page = req.query.page ? req.query.page : 1; 
+  const limit = req.query.limit ? req.query.limit : 10;
+  const page = req.query.page ? req.query.page : 1;
   const skip = limit * page;
   const count = await Order.countDocuments();
   Order.find()
@@ -61,51 +61,74 @@ exports.getStatus = (req, res) => {
 };
 
 exports.changeOrderStatus = (req, res) => {
-  Order.update({ _id: req.order._id }, { $set: { status: req.body.status } }).exec(
-    (err, order) => {
+  Order.update(
+    { _id: req.order._id },
+    { $set: { status: req.body.status } }
+  ).exec((err, order) => {
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+
+    res.json({
+      order: order,
+      message: "order state updated successfully",
+    });
+  });
+};
+
+exports.searchOrder = async (req, res) => {
+  const field = req.query.field;
+  const valToSearch =
+    field === "transaction_id" ? "transaction_id" : "user.name";
+
+  const value = req.query.search;
+  const limit = req.query.limit ? req.query.limit : 10;
+  const page = req.query.page ? req.query.page : 1;
+  const skip = page * limit;
+  const matching = new RegExp(value, "i");
+  const count = await Order.countDocuments({
+    [valToSearch]: { $regex: matching },
+  });
+
+  Order.find({ [valToSearch]: { $regex: matching } })
+    .skip(skip)
+    .limit(limit)
+    .exec((err, result) => {
       if (err) {
         return res.status(400).json({
-          error: err,
+          message: "Something went wrong",
         });
       }
 
       res.json({
-        order: order,
-        message: "order state updated successfully",
+        orders: result,
+        count,
       });
-    }
-  );
+    });
 };
 
+exports.ordersByFilters = async (req, res) => {
+  const filters = req.body;
+  const limit = req.query.limit ? req.query.limit : 10;
+  const page = req.query.page ? req.query.page : 1;
+  const skip = page * limit;
+  const count = await Order.countDocuments(filters);
 
-exports.searchOrder = async (req, res) => {
-
-    const value = req.query.search;
-    const field = req.query.field;
-    const limit = req.query.limit ? req.query.limit : 10;
-    const page = req.query.page ? req.query.page : 1;
-    const skip = page * limit;
-    const matching = new RegExp(value, 'i');
-    const count = await Order.countDocuments();
-
-    const valToSearch = field === 'transaction_id' ? 'transaction_id' : 'user.name'
-    
-    Order.find({[valToSearch] : {$regex: matching}})
+  Order.find(filters)
     .skip(skip)
     .limit(limit)
     .exec((err, result) => {
-  
-      if(err) {
+      if (err) {
         return res.status(400).json({
-          message: 'Something went wrong'
-        })
+          message: "Something went wrong",
+        });
       }
-  
+
       res.json({
         orders: result,
-        count
-      })
-  
-    })
-  
-  }
+        count,
+      });
+    });
+};
