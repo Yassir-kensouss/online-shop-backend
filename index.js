@@ -24,7 +24,7 @@ mongoose.connect(process.env.DATABASE)
 .then(() => console.log('db connected'))
 .catch(() => console.log('not nonnect to the database !'))
 
-//Middlewares
+//Middleware
 app.use(express.json({limit: '50mb'}))
 app.use(expressValidator())
 app.use(cookieParser())
@@ -39,8 +39,24 @@ app.use('/api/product', productRoutes);
 app.use('/api/braintree', braintreeRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
-app.use('/api/file-storage',fileStorageRoutes)
+app.use('/api/file-storage',fileStorageRoutes);
 
+app.get('/api/sse', (req, res) => {
+    res.setHeader('Content-Type','text/event-stream');
+    res.setHeader('Cache-Control','no-cache');
+    res.setHeader('Connection','keep-alive');
+
+    const listener = (event) => {
+        const data = JSON.stringify({message: 'you have a new order'});
+        res.write(`data: ${data}\n\n`);
+    }
+
+    app.on('new-order', listener)
+
+    req.on('close', () => {
+        app.off('new-order', listener)
+    })
+})
 
 const port = process.env.PORT || 3000; 
 app.listen(port, () => console.log(`app is running on port ${port}`));
