@@ -347,6 +347,31 @@ exports.fetchAllProduct = async (req, res) => {
     });
 };
 
+exports.bestSellingProducts = async (req, res) => {
+  const limit = req.query.limit ? req.query.limit : 10;
+  const page = req.query.page ? req.query.page : 1;
+  const skip = page * limit;
+  const filters = req.body
+  const total = await Product.countDocuments(filters);
+  
+  Product.find(filters)
+    .sort('-sold')
+    .skip(skip)
+    .limit(limit)
+    .exec((error, products) => {
+      if (error) {
+        return res.status(404).json({
+          error: error,
+        });
+      }
+
+      res.json({
+        products,
+        total,
+      });
+    });
+};
+
 exports.relatedProduct = (req, res) => {
   let limit = req.query.limit ? parseInt(req.query.limit) : 6;
 
