@@ -1,5 +1,6 @@
 const { USER_HISTORY_TYPES } = require("../config/constants");
 const { Order } = require("../models/order");
+const Product = require("../models/product");
 const { saveUserHistory } = require("./userController");
 
 exports.createOrder = (req, res) => {

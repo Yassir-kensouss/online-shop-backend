@@ -177,7 +177,6 @@ exports.signout = (req, res) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    console.log("det", req.body.email);
     const user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(400).send("User with this email not exist");
 
@@ -196,12 +195,10 @@ exports.resetPassword = async (req, res) => {
     res.send("password reset link sent to your email account.");
   } catch (error) {
     res.send("An error occured");
-    console.log(error);
   }
 };
 
 exports.updatePassword = async (req, res) => {
-  console.log("====", req.body);
   try {
     const user = await User.findById(req.params.userId);
 
@@ -223,6 +220,5 @@ exports.updatePassword = async (req, res) => {
     res.send("password reset successfully");
   } catch (error) {
     res.send("Somthing went wrong!");
-    console.log(error);
   }
 };

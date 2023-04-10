@@ -18,7 +18,6 @@ exports.createNewCart = (req, res) => {
 
 exports.deleteCart = (req, res) => {
   const cartId = req.params.cartId;
-  console.log('cartId', cartId)
 
   Cart.findByIdAndDelete(cartId).exec((error, cart) => {
     if (error || !cart) {

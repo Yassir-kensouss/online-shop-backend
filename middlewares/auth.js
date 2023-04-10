@@ -12,7 +12,6 @@ exports.isAuth = (req,res,next) => {
     let user = req.profile && req.auth && (req.profile._id == req.auth._id)
 
     if(req.auth.role == 1){
-        console.log('=================> is admin')
         return next()
     }
 

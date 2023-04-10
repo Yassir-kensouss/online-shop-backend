@@ -116,7 +116,6 @@ exports.scheduleProduct = async (req, res) => {
     value: "value",
   });
 
-  console.log("scheduleProduct", scheduleProduct);
 };
 
 exports.getSingleProduct = (req, res, next, id) => {

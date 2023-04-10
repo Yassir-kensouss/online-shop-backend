@@ -167,10 +167,10 @@ exports.saveUserHistory = async (userData) => {
         { $set: { history: [...user.history, userData.userHistory] } }
       )
         .then(data => {
-          console.log("history data", data);
+          // console.log("history data", data);
         })
         .catch(error => {
-          console.log("error", error);
+          // console.log("error", error);
         });
     }
   })
