@@ -456,3 +456,25 @@ exports.searchProductByName = async (req, res) => {
       });
     });
 };
+
+exports.mostUsedCategories = (req, res) => {
+
+  Product.aggregate([
+    {$unwind: '$categories'},
+    { $group: { _id: '$categories.name', totalSold: { $sum: '$sold' } } },
+    { $sort: { totalSold: -1 } }
+  ], (err, result) => {
+    
+    if (err) {
+      return res.status(400).json({
+        message: "Something went wrong",
+      });
+    }
+
+    res.json({
+      statistics: result
+    })
+
+  })
+
+}

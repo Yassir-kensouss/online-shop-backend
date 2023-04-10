@@ -14,6 +14,7 @@ const {
   deleteMultipleProducts,
   searchProductByName,
   bestSellingProducts,
+  mostUsedCategories
 } = require("../controllers/productController");
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { productValidator } = require("../middlewares/productValidator");
@@ -36,7 +37,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.get("/", fetchAllProduct);
-router.post("/best-selling-products", bestSellingProducts)
+router.post("/best-selling-products", bestSellingProducts);
+router.get("/most-used-categories", mostUsedCategories)
 router.get("/related/:productId", relatedProduct);
 router.get("/search", searchProduct);
 router.get("/productsList", searchProductByName)
