@@ -14,6 +14,7 @@ const cartRoutes = require('./routes/cart')
 const fileStorageRoutes = require('./routes/filesStorage');
 const braintreeRoutes = require('./routes/braintree');
 const orderRoutes = require('./routes/order');
+const statisticsRoutes = require('./routes/statistics')
 
 //Config App
 require('dotenv').config();
@@ -40,6 +41,7 @@ app.use('/api/braintree', braintreeRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/file-storage',fileStorageRoutes);
+app.use('/api/statistics', statisticsRoutes)
 
 app.get('/api/sse', (req, res) => {
     res.setHeader('Content-Type','text/event-stream');

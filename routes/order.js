@@ -1,9 +1,9 @@
 const express = require('express');
-const { createOrder, fetchOrders, getStatus, changeOrderStatus, searchOrder, ordersByFilters } = require('../controllers/orderController');
+const router = express.Router();
+const { createOrder, fetchOrders, getStatus, changeOrderStatus, searchOrder, ordersByFilters, calculateRevenues } = require('../controllers/orderController');
 const { requireSignIn, isAuth, isAdmin } = require('../middlewares/auth');
 const { orderById } = require('../middlewares/order');
 const { updateProductStock } = require('../middlewares/product');
-const router = express.Router();
 const { userById } = require("../middlewares/user");
 
 router.post('/create/:userId',[requireSignIn, isAuth, updateProductStock] ,createOrder);

@@ -350,10 +350,14 @@ exports.bestSellingProducts = async (req, res) => {
   const limit = req.query.limit ? req.query.limit : 10;
   const page = req.query.page ? req.query.page : 1;
   const skip = page * limit;
-  const filters = req.body
-  const total = await Product.countDocuments(filters);
+  const filters = {};
+  filters['price'] = {
+    $gte : req.query.price.split('-')[0],
+    $lte : req.query.price.split('-')[1],
+  }
+  const total = await Product.countDocuments();
   
-  Product.find(filters)
+  Product.find()
     .sort('-sold')
     .skip(skip)
     .limit(limit)
