@@ -2,18 +2,25 @@ const { USER_HISTORY_TYPES } = require("../config/constants");
 const { Order } = require("../models/order");
 const { saveUserHistory } = require("./userController");
 const useragent = require('useragent');
+const DeviceDetector = require('node-device-detector');
 
 exports.createOrder = async (req, res) => {
 
   const userAgent = useragent.parse(req.headers['user-agent']);
-  const browser = userAgent.toString().split('/')[0];
-  const device = userAgent.toString().split('/')[1];
+
+  const detector = new DeviceDetector({
+    clientIndexes: true,
+    deviceIndexes: true,
+    deviceAliasCode: false,
+  });
+  const result = detector.detect(userAgent.source);
 
   req.body = {
     ...req.body,
     user: req.profile,
-    device: device,
-    browser: browser
+    device: result.device.type,
+    browser: result.client.name,
+    os: result.os.name
   };
 
   const order = new Order(req.body);

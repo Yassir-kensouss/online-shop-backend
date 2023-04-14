@@ -34,7 +34,8 @@ const OrderSchema = new mongoose.Schema(
     updated: Date,
     user: { type: ObjectId, ref: "User" },
     browser: {type: String, trim: true},
-    device: {type: String, trim: true}
+    device: {type: String, trim: true},
+    os: {type: String, trim: true}
   },
   { timestamps: true }
 );
