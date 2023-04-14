@@ -15,6 +15,7 @@ const fileStorageRoutes = require('./routes/filesStorage');
 const braintreeRoutes = require('./routes/braintree');
 const orderRoutes = require('./routes/order');
 const statisticsRoutes = require('./routes/statistics')
+const ip = require('request-ip');
 
 //Config App
 require('dotenv').config();
@@ -30,7 +31,8 @@ app.use(express.json({limit: '50mb'}))
 app.use(expressValidator())
 app.use(cookieParser())
 app.use(cors())
-app.use(express.urlencoded({limit: '50mb',extended: 'true'}))
+app.use(express.urlencoded({limit: '50mb',extended: 'true'}));
+app.use(ip.mw());
 
 //Routes Middleware
 app.use('/api', authRoutes);

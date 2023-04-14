@@ -1,12 +1,19 @@
 const { USER_HISTORY_TYPES } = require("../config/constants");
 const { Order } = require("../models/order");
-const Product = require("../models/product");
 const { saveUserHistory } = require("./userController");
+const useragent = require('useragent');
 
-exports.createOrder = (req, res) => {
+exports.createOrder = async (req, res) => {
+
+  const userAgent = useragent.parse(req.headers['user-agent']);
+  const browser = userAgent.toString().split('/')[0];
+  const device = userAgent.toString().split('/')[1];
+
   req.body = {
     ...req.body,
     user: req.profile,
+    device: device,
+    browser: browser
   };
 
   const order = new Order(req.body);
