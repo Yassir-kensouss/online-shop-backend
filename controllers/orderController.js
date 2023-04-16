@@ -20,7 +20,9 @@ exports.createOrder = async (req, res) => {
     user: req.profile,
     device: result.device.type,
     browser: result.client.name,
-    os: result.os.name
+    os: result.os.name,
+    country: req.body.address.country,
+    country_code: req.body.address.country_code,
   };
 
   const order = new Order(req.body);

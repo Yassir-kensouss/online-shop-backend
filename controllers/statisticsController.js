@@ -1,6 +1,8 @@
 const { Order } = require("../models/order");
 const User = require("../models/user");
 const moment = require("moment");
+const emojiFlags = require("emoji-flags");
+const countries = require("../utils/countries.json");
 
 exports.calculateRevenues = async (req, res) => {
   const currentDate = new Date();
@@ -170,7 +172,7 @@ exports.browserTraffic = async (req, res) => {
       safari: 0,
       firefox: 0,
       unknown: 0,
-      me:0,
+      me: 0,
     };
 
     orders.map(order => {
@@ -186,16 +188,18 @@ exports.browserTraffic = async (req, res) => {
         browsers.safari = browsers.safari + 1;
       } else if (order.browser === null || order.browser === "browser") {
         browsers.unknown = browsers.unknown + 1;
-      }else if (order.browser?.includes("Microsoft Edge")) {
+      } else if (order.browser?.includes("Microsoft Edge")) {
         browsers.me = browsers.me + 1;
       }
     });
 
     const sortedObj = {};
 
-    Object.keys(browsers).sort((a, b) => browsers[b] - browsers[a]).forEach(key => {
-      sortedObj[key] = browsers[key];
-    });
+    Object.keys(browsers)
+      .sort((a, b) => browsers[b] - browsers[a])
+      .forEach(key => {
+        sortedObj[key] = browsers[key];
+      });
 
     const chartData = {
       labels: Object.keys(sortedObj).map(el => {
@@ -217,49 +221,73 @@ exports.browserTraffic = async (req, res) => {
   });
 };
 
-
 exports.deviceTraffic = async (req, res) => {
-
   const pipeline = [
+    { $match: { device: { $exists: true, $ne: null } } },
     {
-      $group:{_id: {$ifNull: ["$device", "Unknown"]}, count: {$sum: 1}}
-    }
+      $group: { _id: { $ifNull: ["$device", "Unknown"] }, count: { $sum: 1 } },
+    },
   ];
 
   Order.aggregate(pipeline, (err, result) => {
-
-    if(err) {
+    if (err) {
       return res.status(400).json({
-        error: err
-      })
+        error: err,
+      });
     }
 
     res.json({
-      chartData: result
-    })
-
-  })
-
-}
+      chartData: result,
+    });
+  });
+};
 
 exports.osTraffic = (req, res) => {
-
   const pipeline = [
-    { $group: { _id:  {$ifNull: ["$os", "Unknown"]}, count: { $sum: 1 } } }
+    { $match: { os: { $exists: true, $ne: null } } },
+    { $group: { _id: { $ifNull: ["$os", "Unknown"] }, count: { $sum: 1 } } },
   ];
 
   Order.aggregate(pipeline, (err, result) => {
-
-    if(err) {
+    if (err) {
       return res.status(400).json({
-        error: err
-      })
+        error: err,
+      });
     }
 
     res.json({
-      chartData: result
-    })
+      chartData: result,
+    });
+  });
+};
 
-  })
+exports.countriesTraffic = (req, res) => {
+  const pipeline = [
+    { $match: { country: { $exists: true, $ne: null } } },
+    { $group: { _id: "$country", count: { $sum: 1 } } },
+    {
+      $project: {
+        _id: 0,
+        country: "$_id",
+        count: 1,
+        country_code: "$address.country_code",
+      },
+    },
+  ];
 
-}
+  Order.aggregate(pipeline, (err, result) => {
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    }
+    const totalCount = result.reduce((total, item) => total + item.count, 0);
+    result.map(el => {
+      el.percentage = Math.floor((el.count / totalCount) * 100);
+    });
+
+    res.json({
+      result,
+    });
+  });
+};

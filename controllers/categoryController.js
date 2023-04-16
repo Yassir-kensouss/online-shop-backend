@@ -97,8 +97,9 @@ exports.deleteMultiCategories = (req, res) => {
 
 
 exports.fetchAllCategories = async (req, res) => {
-  const perPage = 10;
-  const page = Math.max(0,req.query.page);
+  const limit = req.query.limit ? req.query.limit : 10;
+  const page = req.query.page ? req.query.page : 1;
+  const skip = limit * page;
 
     const productGroup = await Product.aggregate([
       { $unwind: "$categories" },
@@ -118,8 +119,8 @@ exports.fetchAllCategories = async (req, res) => {
       }
       else{
         Category.find()
-        .limit(perPage)
-        .skip(perPage * page)
+        .skip(skip)
+        .limit(limit)
         .sort({createdAt:'desc'})
         .exec((err, categories) => {
 
@@ -139,7 +140,6 @@ exports.fetchAllCategories = async (req, res) => {
           res.json({
             categories: categoriesCount,
             count: count,
-            perPage:perPage
           });
         });
       }
@@ -164,18 +164,20 @@ exports.postMultipleCategories = (req,res) => {
 
 // Search category
 
-exports.searchCategory = (req,res) => {
+exports.searchCategory = async (req,res) => {
 
-  const perPage = 10;
-  const page = Math.max(0,req.query.page);
+  const limit = req.query.limit ? req.query.limit : 10;
+  const page = req.query.page ? req.query.page : 1;
+  const skip = limit * page;
   const searchValue = req.query.searchValue;
   const matching = new RegExp(searchValue,'i');
 
+  const count = await Category.countDocuments({name: {$regex: matching}})
+
   Category
     .find({name: {$regex: matching}})
-    .limit(perPage)
-    .skip(perPage * page)
     .exec((err, categories) => {
+      console.log('categories', categories)
       if(err){
         res.status(400).json({
           error: 'Categories not found'
@@ -184,8 +186,7 @@ exports.searchCategory = (req,res) => {
 
       res.json({
         categories,
-        count: categories.length,
-        perPage:perPage,
+        count
       })
     })
 

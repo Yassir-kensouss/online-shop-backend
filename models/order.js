@@ -15,13 +15,21 @@ const CartItemSchema = new mongoose.Schema(
 );
  
 const CartItem = mongoose.model("CartItem", CartItemSchema);
+
+const AddressSchema = new mongoose.Schema({
+  address: {type: String, required: true, trim: true},
+  state: {type: String, required: true, trim: true},
+  country: {type: String, required: true, trim: true},
+  zip_code: {type: String, required: true, trim: true},
+  country_code: {type: String, required: true, trim: true}
+})
  
 const OrderSchema = new mongoose.Schema(
   {
     products: [CartItemSchema],
     transaction_id: {},
     totalPrice: { type: Number },
-    address: String,
+    address: {type: AddressSchema},
     date: {
         type: Date,
         default: currentDate
@@ -29,13 +37,14 @@ const OrderSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "Not processed",
-      enum: ["Not processed", "Processing", "Shipped", "Delivered", "Cancelled"] // enum means string objects
+      enum: ["Not processed", "Processing", "Shipped", "Delivered", "Cancelled"]
     },
     updated: Date,
     user: { type: ObjectId, ref: "User" },
     browser: {type: String, trim: true},
     device: {type: String, trim: true},
-    os: {type: String, trim: true}
+    os: {type: String, trim: true},
+    country: {type: String},
   },
   { timestamps: true }
 );
