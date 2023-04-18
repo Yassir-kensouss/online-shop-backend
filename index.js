@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const expressValidator = require('express-validator')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
+const ip = require('request-ip');
 
 
 //Import Routes
@@ -14,8 +15,8 @@ const cartRoutes = require('./routes/cart')
 const fileStorageRoutes = require('./routes/filesStorage');
 const braintreeRoutes = require('./routes/braintree');
 const orderRoutes = require('./routes/order');
-const statisticsRoutes = require('./routes/statistics')
-const ip = require('request-ip');
+const statisticsRoutes = require('./routes/statistics');
+const generaleSettingsRoutes = require('./routes/generaleSettings')
 
 //Config App
 require('dotenv').config();
@@ -43,7 +44,8 @@ app.use('/api/braintree', braintreeRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/file-storage',fileStorageRoutes);
-app.use('/api/statistics', statisticsRoutes)
+app.use('/api/statistics', statisticsRoutes);
+app.use('/api/settings', generaleSettingsRoutes);
 
 app.get('/api/sse', (req, res) => {
     res.setHeader('Content-Type','text/event-stream');
