@@ -79,61 +79,61 @@ exports.deleteMultiCategories = (req, res) => {
 
   Category.deleteMany(
     {
-      _id: {$in: ids},
+      _id: { $in: ids },
     },
     (err, result) => {
       if (err) {
         res.status(400).json({
-          error: err
+          error: err,
         });
       } else {
         res.json({
-          result
+          result,
         });
       }
     }
   );
 };
 
-
 exports.fetchAllCategories = async (req, res) => {
   const limit = req.query.limit ? req.query.limit : 10;
   const page = req.query.page ? req.query.page : 1;
   const skip = limit * page;
 
-    const productGroup = await Product.aggregate([
-      { $unwind: "$categories" },
-      {
-        $group: {
-          _id: "$categories",
-          count: { $sum: 1 },
-        },
+  const productGroup = await Product.aggregate([
+    { $unwind: "$categories" },
+    {
+      $group: {
+        _id: "$categories",
+        count: { $sum: 1 },
       },
-    ]);
+    },
+  ]);
 
-    Category.countDocuments({},(err, count) => {
-      if(err){
-        return res.status(400).json({
-          error: err
-        })
-      }
-      else{
-        Category.find()
+  Category.countDocuments({}, (err, count) => {
+    if (err) {
+      return res.status(400).json({
+        error: err,
+      });
+    } else {
+      Category.find()
         .skip(skip)
         .limit(limit)
-        .sort({createdAt:'desc'})
+        .sort({ createdAt: "desc" })
         .exec((err, categories) => {
-
           const categoriesCount = categories.map(category => {
-            const count = productGroup.find(el => el._id.name.toString() === category.name.toString())?.count || 0;
+            const count =
+              productGroup.find(
+                el => el._id.name.toString() === category.name.toString()
+              )?.count || 0;
             return {
               ...category.toObject(),
               linkedProduct: count,
-            }
-          })
+            };
+          });
 
-          if (err) {
-            return res.status(500).json({
+          if (err || !categories) {
+            return res.status(400).json({
               error: err,
             });
           }
@@ -142,70 +142,61 @@ exports.fetchAllCategories = async (req, res) => {
             count: count,
           });
         });
-      }
-    })
+    }
+  });
 };
 
 // Post multiple categories
-exports.postMultipleCategories = (req,res) => {
-
-  Category.insertMany(req.body,(err,cats) => {
-    if(err){
+exports.postMultipleCategories = (req, res) => {
+  Category.insertMany(req.body, (err, cats) => {
+    if (err) {
       return res.status(400).json({
-        error: err
-      })
+        error: err,
+      });
     }
 
     res.json({
       categories: cats,
-    })
-  })
-}
+    });
+  });
+};
 
 // Search category
 
-exports.searchCategory = async (req,res) => {
-
+exports.searchCategory = async (req, res) => {
   const limit = req.query.limit ? req.query.limit : 10;
   const page = req.query.page ? req.query.page : 1;
   const skip = limit * page;
   const searchValue = req.query.searchValue;
-  const matching = new RegExp(searchValue,'i');
+  const matching = new RegExp(searchValue, "i");
 
-  const count = await Category.countDocuments({name: {$regex: matching}})
+  const count = await Category.countDocuments({ name: { $regex: matching } });
 
-  Category
-    .find({name: {$regex: matching}})
-    .exec((err, categories) => {
-      console.log('categories', categories)
-      if(err){
-        res.status(400).json({
-          error: 'Categories not found'
-        })
-      }
+  Category.find({ name: { $regex: matching } }).exec((err, categories) => {
 
-      res.json({
-        categories,
-        count
-      })
-    })
+    if (err || !categories) {
+      res.status(400).json({
+        error: "Categories not found",
+      });
+    }
 
-}
+    res.json({
+      categories,
+      count,
+    });
+  });
+};
 
-exports.fetchCategories = (req,res) => {
-  Category
-    .find()
-    .exec((err, categories) => {
-      if(err){
-        res.status(400).json({
-          error: 'Categories not found'
-        })
-      }
+exports.fetchCategories = (req, res) => {
+  Category.find().exec((err, categories) => {
+    if (err || !categories) {
+      res.status(400).json({
+        error: "Categories not found",
+      });
+    }
 
-      res.json({
-        categories,
-      })
-    })
-
-}
-
+    res.json({
+      categories,
+    });
+  });
+};

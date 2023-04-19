@@ -26,7 +26,7 @@ exports.calculateRevenues = async (req, res) => {
   });
 
   Order.find().exec((err, orders) => {
-    if (err) {
+    if (err || !orders) {
       return res.status(400).json({
         message: "Something went wrong",
       });
@@ -159,7 +159,7 @@ exports.totalRevenueInterval = async (req, res) => {
 
 exports.browserTraffic = async (req, res) => {
   Order.find().exec((err, orders) => {
-    if (err) {
+    if (err || !orders) {
       return res.status(400).json({
         error: err,
       });

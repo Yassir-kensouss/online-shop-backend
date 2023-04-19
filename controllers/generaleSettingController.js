@@ -67,7 +67,7 @@ exports.updateGeneraleSettings = async (req, res) => {
 
 exports.fetchGeneraleSettings = (req, res) => {
   GeneraleSetting.find().exec((err, data) => {
-    if (err) {
+    if (err || !data) {
       return res.status(400).json({
         error: err,
       });

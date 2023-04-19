@@ -333,7 +333,8 @@ exports.fetchAllProduct = async (req, res) => {
     .skip(skip)
     .limit(limit)
     .exec((error, products) => {
-      if (error) {
+
+      if (error || !products) {
         return res.status(404).json({
           error: error,
         });
@@ -364,7 +365,7 @@ exports.bestSellingProducts = async (req, res) => {
     .skip(skip)
     .limit(limit)
     .exec((error, products) => {
-      if (error) {
+      if (error || !products) {
         return res.status(404).json({
           error: error,
         });
@@ -388,7 +389,7 @@ exports.relatedProduct = (req, res) => {
     .select("-photo")
     .populate("category", "_id name")
     .exec((err, products) => {
-      if (err) {
+      if (err || !products) {
         return res.status(404).json({
           error: "Products not found !",
         });
@@ -425,7 +426,7 @@ exports.searchProduct = (req, res) => {
     .limit(limit)
     .skip(skip)
     .exec((error, products) => {
-      if (error) {
+      if (error || !products) {
         return res.status(404).json({
           error: "Prodyc not founD",
         });
@@ -449,7 +450,7 @@ exports.searchProductByName = async (req, res) => {
     .skip(skip)
     .limit(limit)
     .exec((err, products) => {
-      if (err) {
+      if (err || !products) {
         return res.status(400).json({
           message: "Something went wrong",
         });

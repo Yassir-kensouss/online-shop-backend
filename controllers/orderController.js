@@ -66,7 +66,7 @@ exports.fetchOrders = async (req, res) => {
     .populate("user", "_id name email")
     .sort("-createdAt")
     .exec((error, orders) => {
-      if (error) {
+      if (error || !orders) {
         return res.status(400).json({
           error: error,
         });

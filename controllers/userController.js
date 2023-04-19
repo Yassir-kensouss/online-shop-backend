@@ -16,7 +16,7 @@ exports.fetchAllUsers = async (req,res) => {
   .skip(skip)
   .limit(limit)
   .exec((error, users) => {
-    if(error){
+    if(error || !users){
       return res.status(400).json({
         message: error
       })
@@ -98,7 +98,7 @@ exports.searchCustomerByName = async (req, res) => {
   .limit(limit)
   .exec((err, result) => {
 
-    if(err) {
+    if(err || !result) {
       return res.status(400).json({
         message: 'Something went wrong'
       })
