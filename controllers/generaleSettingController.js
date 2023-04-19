@@ -34,8 +34,8 @@ exports.updateGeneraleSettings = async (req, res) => {
     const file = req.body.brand;
     result = await cloudinary.uploader.upload(file, {
       crop: 'fill',
-      width: 120, // set your desired width here
-      height: 40, // set your desired height here
+      width: 35, // set your desired width here
+      height: 35, // set your desired height here
       gravity: 'center',
       format: 'jpg',
       quality: 'auto',
