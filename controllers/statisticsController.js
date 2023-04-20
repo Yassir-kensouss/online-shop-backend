@@ -3,6 +3,7 @@ const User = require("../models/user");
 const moment = require("moment");
 const emojiFlags = require("emoji-flags");
 const countries = require("../utils/countries.json");
+const Product = require("../models/product");
 
 exports.calculateRevenues = async (req, res) => {
   const currentDate = new Date();
@@ -10,6 +11,7 @@ exports.calculateRevenues = async (req, res) => {
   const fromDate = new Date(currentDate - periodTime);
   const last48hour = new Date(currentDate - periodTime * 2);
 
+  const productsCount = await Product.countDocuments();
   const ordersCount = await Order.countDocuments();
   const usersCount = await User.countDocuments();
   const newOrdersCount = await Order.countDocuments({
@@ -51,6 +53,7 @@ exports.calculateRevenues = async (req, res) => {
         value: newUsersCount,
         rate: newUsersCount > last48hourUsers ? 1 : 0,
       },
+      productsCount,
     });
   });
 };
@@ -210,7 +213,6 @@ exports.browserTraffic = async (req, res) => {
           label: "Browsers",
           data: Object.keys(sortedObj).map(el => sortedObj[el]),
           backgroundColor: "#6366f1",
-          borderColor: "#6366f1",
         },
       ],
     };

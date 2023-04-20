@@ -115,7 +115,6 @@ exports.scheduleProduct = async (req, res) => {
     score: 1,
     value: "value",
   });
-
 };
 
 exports.getSingleProduct = (req, res, next, id) => {
@@ -196,12 +195,15 @@ exports.updateProduct = async (req, res) => {
     });
   }
 
-  const newPhotos = req.body.photos.filter(el => el.url.includes('data'))
-  const oldPhotos = req.body.photos.filter(el => el.url.includes('https'))
+  const newPhotos = req.body.photos.filter(el => el.url.includes("data"));
+  const oldPhotos = req.body.photos.filter(el => el.url.includes("https"));
 
-  if (req.body.photos.length > 0 && newPhotos.length > 0 && oldPhotos.length > 0) {
+  if (
+    req.body.photos.length > 0 &&
+    newPhotos.length > 0 &&
+    oldPhotos.length > 0
+  ) {
     try {
-
       let multiplePicturesPromise = newPhotos.map(picture => {
         return cloudinary.uploader.upload(picture.url);
       });
@@ -223,32 +225,31 @@ exports.updateProduct = async (req, res) => {
         ];
       });
 
-        Product.findOneAndUpdate(
-          { _id: req.body._id },
-          {
-            $set: {
-              ...req.body,
-              photos: [...formateRes, ...oldPhotos]
-            },
+      Product.findOneAndUpdate(
+        { _id: req.body._id },
+        {
+          $set: {
+            ...req.body,
+            photos: [...formateRes, ...oldPhotos],
           },
-          { new: true }
-        )
-          .then(data => {
-            res.json({
-              message: "Product updated successfully",
-              product: data,
-            });
-          })
-          .catch(error => {
-            res.status(500).send(error);
+        },
+        { new: true }
+      )
+        .then(data => {
+          res.json({
+            message: "Product updated successfully",
+            product: data,
           });
+        })
+        .catch(error => {
+          res.status(500).send(error);
+        });
     } catch (error) {
       return res.status(500).json({
         message: "Something went wrong, Please try again",
       });
     }
-  }
-  else if(newPhotos.length > 0 && oldPhotos.length === 0){
+  } else if (newPhotos.length > 0 && oldPhotos.length === 0) {
     try {
       const pictureFiles = req.body.photos;
 
@@ -272,34 +273,32 @@ exports.updateProduct = async (req, res) => {
           },
         ];
       });
-      
-        Product.findOneAndUpdate(
-          { _id: req.body._id },
-          {
-            $set: {
-              ...req.body,
-              photos: formateRes
-            },
-          },
-          { new: true }
-        )
-          .then(data => {
-            res.json({
-              message: "Product updated successfully",
-              product: data,
-            });
-          })
-          .catch(error => {
-            res.status(500).send(error);
-          });
-        }
-        catch (error) {
-          res.status(500).send(error);
-        }
-  } else {
 
-    if(req.body.photos?.length === 0 || !req.body.photos ){
-      return res.status(404).send('At least add one photo for the product')
+      Product.findOneAndUpdate(
+        { _id: req.body._id },
+        {
+          $set: {
+            ...req.body,
+            photos: formateRes,
+          },
+        },
+        { new: true }
+      )
+        .then(data => {
+          res.json({
+            message: "Product updated successfully",
+            product: data,
+          });
+        })
+        .catch(error => {
+          res.status(500).send(error);
+        });
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  } else {
+    if (req.body.photos?.length === 0 || !req.body.photos) {
+      return res.status(404).send("At least add one photo for the product");
     }
 
     Product.findOneAndUpdate(
@@ -333,7 +332,6 @@ exports.fetchAllProduct = async (req, res) => {
     .skip(skip)
     .limit(limit)
     .exec((error, products) => {
-
       if (error || !products) {
         return res.status(404).json({
           error: error,
@@ -359,9 +357,9 @@ exports.bestSellingProducts = async (req, res) => {
       })
     : null;
   const total = await Product.countDocuments(filters);
-  
+
   Product.find(filters)
-    .sort('-sold')
+    .sort("-sold")
     .skip(skip)
     .limit(limit)
     .exec((error, products) => {
@@ -464,23 +462,22 @@ exports.searchProductByName = async (req, res) => {
 };
 
 exports.mostUsedCategories = (req, res) => {
+  Product.aggregate(
+    [
+      { $unwind: "$categories" },
+      { $group: { _id: "$categories.name", totalSold: { $sum: "$sold" } } },
+      { $sort: { totalSold: -1 } },
+    ],
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({
+          message: "Something went wrong",
+        });
+      }
 
-  Product.aggregate([
-    {$unwind: '$categories'},
-    { $group: { _id: '$categories.name', totalSold: { $sum: '$sold' } } },
-    { $sort: { totalSold: -1 } }
-  ], (err, result) => {
-    
-    if (err) {
-      return res.status(400).json({
-        message: "Something went wrong",
+      res.json({
+        statistics: result,
       });
     }
-
-    res.json({
-      statistics: result
-    })
-
-  })
-
-}
+  );
+};
