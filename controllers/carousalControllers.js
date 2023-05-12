@@ -19,8 +19,6 @@ exports.addHeroCarousalSlide = async (req, res) => {
     photo: result.secure_url,
   };
 
-  console.log("req.body", req.body);
-
   const carousal = new HeroCarousals(req.body);
   carousal.save((err, result) => {
     if (err || !result) {
@@ -63,4 +61,49 @@ exports.deleteHeroCarousalSlide = (req, res) => {
       slide,
     });
   });
+};
+
+exports.editHeroCarousalSlide = async (req, res) => {
+  const _id = req.query._id;
+
+  if (!req.body.photo.includes("https")) {
+    const file = req.body.photo;
+    const result = await cloudinary.uploader.upload(file, {
+      crop: "fill",
+      width: 1112, // set your desired width here
+      height: 500, // set your desired height here
+      gravity: "center",
+      format: "jpg",
+      quality: "auto",
+      secure: true,
+      cropMode: "limit",
+    });
+
+    req.body = {
+      ...req.body,
+      photo: result.secure_url,
+    };
+  } else {
+    req.body = {
+      ...req.body,
+    };
+  }
+
+  HeroCarousals.findOneAndUpdate(
+    { _id: _id },
+    {
+      $set: {
+        ...req.body,
+      },
+    },
+    { new: true }
+  )
+    .then(slide => {
+      res.json({
+        slide,
+      });
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    });
 };
