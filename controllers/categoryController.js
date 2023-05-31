@@ -1,12 +1,32 @@
 const formidable = require("formidable");
 const Category = require("../models/category");
 const Product = require("../models/product");
+const { cloudinary } = require("../utils/cloudinary");
 
-exports.createCategory = (req, res) => {
-  const category = new Category(req.body);
+exports.createCategory = async (req, res) => {
+  let result = null;
+
+  if (req.body.image) {
+    const file = req.body.image;
+    result = await cloudinary.uploader.upload(file, {
+      crop: "fill",
+      width: 350, // set your desired width here
+      height: 350, // set your desired height here
+      gravity: "center",
+      format: "jpg",
+      quality: "auto",
+      secure: true,
+      cropMode: "limit",
+    });
+  }
+
+  const category = new Category({
+    ...req.body,
+    image: result ? result.secure_url : null,
+  });
 
   category.save((err, category) => {
-    if (err) {
+    if (err || !category) {
       return res.status(400).json({
         error: "Bad request !",
       });
@@ -20,7 +40,7 @@ exports.getCategory = (req, res, next, id) => {
   Category.findById(id).exec((err, category) => {
     if (err || !category) {
       return res.status(404).json({
-        error: "Product Not found",
+        error: "Category Not found",
       });
     }
 
@@ -36,13 +56,32 @@ exports.getSingleCategory = (req, res) => {
   });
 };
 
-exports.updateCategory = (req, res) => {
+exports.updateCategory = async (req, res) => {
   let category = req.category;
 
+  let result = null;
+
+  if (!req.body.image.includes("https")) {
+    const file = req.body.image;
+    result = await cloudinary.uploader.upload(file, {
+      crop: "fill",
+      width: 350, // set your desired width here
+      height: 350, // set your desired height here
+      gravity: "center",
+      format: "jpg",
+      quality: "auto",
+      secure: true,
+      cropMode: "limit",
+    });
+
+    req.body.image = result.secure_url;
+  }
+
   category.name = req.body.name;
+  category.image = req.body.image;
 
   category.save((err, category) => {
-    if (err) {
+    if (err || !category) {
       return res.status(400).json({
         error: "Bad request",
       });
@@ -60,7 +99,7 @@ exports.deleteCategory = (req, res) => {
   let category = req.category;
 
   category.remove((err, category) => {
-    if (err) {
+    if (err || !category) {
       return res.status(404).json({
         error: "Category not found",
       });
@@ -173,7 +212,6 @@ exports.searchCategory = async (req, res) => {
   const count = await Category.countDocuments({ name: { $regex: matching } });
 
   Category.find({ name: { $regex: matching } }).exec((err, categories) => {
-
     if (err || !categories) {
       res.status(400).json({
         error: "Categories not found",

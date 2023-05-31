@@ -1,5 +1,25 @@
 const mongoose = require("mongoose");
-const { ObjectId } = mongoose.Schema;
+
+const variantSchema = new mongoose.Schema({
+  colors: {
+    type: Array,
+  },
+  size: {
+    type: String,
+  },
+  sku: {
+    type: String,
+  },
+  material: {
+    type: String,
+  },
+  price: {
+    type: Number,
+  },
+  quantity: {
+    type: Number,
+  },
+});
 
 const productSchema = new mongoose.Schema(
   {
@@ -40,26 +60,33 @@ const productSchema = new mongoose.Schema(
       max: 500000,
       required: true,
     },
-    photos: [{
-      type: Object,
-      required: true
-    }],
-    categories: [{
-      type: Object,
-      ref:'Category',
-      require: true,
-    }],
-    tags: [{
-      type: String
-    }],
-    sold:{
+    photos: [
+      {
+        type: Object,
+        required: true,
+      },
+    ],
+    categories: [
+      {
+        type: Object,
+        ref: "Category",
+        require: true,
+      },
+    ],
+    tags: [
+      {
+        type: String,
+      },
+    ],
+    sold: {
       type: Number,
-      default: 0
+      default: 0,
     },
     stock: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
+    variants: [variantSchema],
   },
   { timestamps: true }
 );

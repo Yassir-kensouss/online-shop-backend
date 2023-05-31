@@ -17,6 +17,7 @@ exports.createProduct = async (req, res) => {
     visibility: Joi.string().allow(null),
     categories: Joi.array(),
     files: Joi.required(),
+    variants: Joi.array(),
   });
 
   const validationError = validationSchema.validate(req.body);
