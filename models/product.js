@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
 const variantSchema = new mongoose.Schema({
-  colors: {
-    type: Array,
+  color: {
+    type: String,
   },
   size: {
     type: String,
@@ -39,7 +39,7 @@ const productSchema = new mongoose.Schema(
       maxlength: 1000,
       require: true,
     },
-    oldprice: {
+    oldPrice: {
       type: Number,
     },
     price: {
