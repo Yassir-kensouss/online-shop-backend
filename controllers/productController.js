@@ -15,7 +15,7 @@ exports.createProduct = async (req, res) => {
     sku: Joi.string().max(30).allow(null),
     quantity: Joi.number().max(500000).required(),
     visibility: Joi.string().allow(null),
-    categories: Joi.array(),
+    category: Joi.object(),
     files: Joi.required(),
     variants: Joi.array(),
   });
@@ -184,7 +184,7 @@ exports.updateProduct = async (req, res) => {
     sku: Joi.string().max(30).allow(null),
     quantity: Joi.number().max(500000).required(),
     visibility: Joi.string().allow(null),
-    categories: Joi.array(),
+    category: Joi.object(),
     photos: Joi.array(),
   });
 
@@ -481,4 +481,38 @@ exports.mostUsedCategories = (req, res) => {
       });
     }
   );
+};
+
+exports.getProductsByFilter = async (req, res) => {
+  const limit = req.query.limit ? req.query.limit : 10;
+  const page = req.query.page ? req.query.page : 0;
+  const skip = page * limit;
+
+  let query = {};
+
+  if (req.body.category.length > 0) {
+    query["category.name"] = { $in: req.body.category };
+  }
+
+  if (req.body.brand.length > 0) {
+    query["brand.name"] = { $in: req.body.brand };
+  }
+
+  const total = await Product.countDocuments(query);
+
+  Product.find(query)
+    .skip(skip)
+    .limit(limit)
+    .exec((err, products) => {
+      if (err || !products) {
+        return res.status(400).json({
+          error: "Product not found",
+        });
+      }
+
+      res.json({
+        products,
+        total,
+      });
+    });
 };

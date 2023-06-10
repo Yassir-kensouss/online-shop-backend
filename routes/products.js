@@ -15,6 +15,7 @@ const {
   searchProductByName,
   bestSellingProducts,
   mostUsedCategories,
+  getProductsByFilter,
 } = require("../controllers/productController");
 const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 const { productValidator } = require("../middlewares/productValidator");
@@ -33,6 +34,7 @@ router.post(
   duplicateProduct
 );
 router.post("/schedule", scheduleProduct);
+router.post("/products/all", getProductsByFilter);
 router.get("/:productId", showSingleProduct);
 router.delete(
   "/:productId/:userId",

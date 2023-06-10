@@ -66,13 +66,11 @@ const productSchema = new mongoose.Schema(
         required: true,
       },
     ],
-    categories: [
-      {
-        type: Object,
-        ref: "Category",
-        require: true,
-      },
-    ],
+    category: {
+      type: Object,
+      ref: "Category",
+      require: true,
+    },
     tags: [
       {
         type: String,
