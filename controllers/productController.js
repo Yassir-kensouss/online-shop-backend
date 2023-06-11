@@ -18,7 +18,7 @@ exports.createProduct = async (req, res) => {
     category: Joi.object(),
     brand: Joi.object(),
     color: Joi.string().required(),
-    size: Joi.string().required(),
+    size: Joi.object().required(),
     files: Joi.required(),
     variants: Joi.array(),
   });
@@ -189,7 +189,9 @@ exports.updateProduct = async (req, res) => {
     visibility: Joi.string().allow(null),
     category: Joi.object(),
     brand: Joi.object(),
-    photos: Joi.array(),
+    photos: Joi.array().required(),
+    color: Joi.string().required(),
+    size: Joi.object().required(),
   });
 
   const validationError = validationSchema.validate(req.body);
@@ -491,6 +493,7 @@ exports.getProductsByFilter = async (req, res) => {
   const limit = req.query.limit ? req.query.limit : 10;
   const page = req.query.page ? req.query.page : 0;
   const skip = page * limit;
+  const sort = req.body.sort ? req.body.sort.code : "asc";
 
   let query = {};
 
@@ -500,6 +503,10 @@ exports.getProductsByFilter = async (req, res) => {
 
   if (req.body.brand.length > 0) {
     query["brand.name"] = { $in: req.body.brand };
+  }
+
+  if (req.body.size.length > 0) {
+    query["size.name"] = { $in: req.body.size };
   }
 
   if (req.body.price.maxPrice > 0) {
@@ -514,6 +521,7 @@ exports.getProductsByFilter = async (req, res) => {
   Product.find(query)
     .skip(skip)
     .limit(limit)
+    .sort({ createdAt: sort })
     .exec((err, products) => {
       if (err || !products) {
         return res.status(400).json({
