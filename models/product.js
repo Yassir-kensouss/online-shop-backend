@@ -71,6 +71,18 @@ const productSchema = new mongoose.Schema(
       ref: "Category",
       require: true,
     },
+    brand: {
+      type: Object,
+      ref: "Brands",
+    },
+    color: {
+      type: String,
+      required: true,
+    },
+    size: {
+      type: String,
+      required: true,
+    },
     tags: [
       {
         type: String,

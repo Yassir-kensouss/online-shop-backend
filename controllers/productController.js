@@ -16,6 +16,9 @@ exports.createProduct = async (req, res) => {
     quantity: Joi.number().max(500000).required(),
     visibility: Joi.string().allow(null),
     category: Joi.object(),
+    brand: Joi.object(),
+    color: Joi.string().required(),
+    size: Joi.string().required(),
     files: Joi.required(),
     variants: Joi.array(),
   });
@@ -185,6 +188,7 @@ exports.updateProduct = async (req, res) => {
     quantity: Joi.number().max(500000).required(),
     visibility: Joi.string().allow(null),
     category: Joi.object(),
+    brand: Joi.object(),
     photos: Joi.array(),
   });
 
@@ -496,6 +500,13 @@ exports.getProductsByFilter = async (req, res) => {
 
   if (req.body.brand.length > 0) {
     query["brand.name"] = { $in: req.body.brand };
+  }
+
+  if (req.body.price.maxPrice > 0) {
+    query["price"] = {
+      $gte: req.body.price.minPrice,
+      $lte: req.body.price.maxPrice,
+    };
   }
 
   const total = await Product.countDocuments(query);
