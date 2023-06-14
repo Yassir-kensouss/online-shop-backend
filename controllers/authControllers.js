@@ -12,79 +12,76 @@ const { USER_HISTORY_TYPES } = require("../config/constants");
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
 exports.signup = async (req, res) => {
+  const validationSchema = Joi.object({
+    name: Joi.string().max(20).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+    state: Joi.string(),
+    about: Joi.string().optional(),
+    role: Joi.number(),
+    avatar: Joi.string().allow("").optional(),
+    address: Joi.object(),
+    phone: Joi.string(),
+    mobile: Joi.string(),
+  });
 
-    const validationSchema = Joi.object({
-      name: Joi.string().max(20).required(),
-      email: Joi.string().email().required(),
-      password: Joi.string().required(),
-      state: Joi.string(),
-      about: Joi.string().optional(),
-      role: Joi.number(),
-      avatar: Joi.string().allow("").optional(),
-      address: Joi.object(),
-      phone: Joi.string(),
-      mobile: Joi.string(),
+  const validationError = validationSchema.validate(req.body);
+
+  if (validationError.error) {
+    return res.status(400).json({
+      error: validationError.error.details[0].message,
     });
-  
-    const validationError = validationSchema.validate(req.body);
-  
-    if (validationError.error) {
-      return res.status(400).json({
-        error: validationError.error.details[0].message,
-      });
-    }
+  }
 
-    if (req.body.avatar) {
-      const file = req.body.avatar;
-      cloudinary.uploader.upload(file, (error, result) => {
-
-        if(error){
-          return res.status(400).json({
-            message: error
-          })
-        }
-
-        const user = new User({
-          avatar: result.secure_url,
-          ...req.body,
+  if (req.body.avatar) {
+    const file = req.body.avatar;
+    cloudinary.uploader.upload(file, (error, result) => {
+      if (error) {
+        return res.status(400).json({
+          message: error,
         });
+      }
 
-        saveUser(user);
-      });
-    } else {
       const user = new User({
+        avatar: result.secure_url,
         ...req.body,
       });
 
-      user.save((err, user) => {
-        if (err) {
-          if (err.code === 11000) {
-            return res.status(400).json({
-              error: "Email is already exists",
-            });
-          }
-          return res.status(400).send(err);
+      saveUser(user);
+    });
+  } else {
+    const user = new User({
+      ...req.body,
+    });
+
+    user.save((err, user) => {
+      if (err) {
+        if (err.code === 11000) {
+          return res.status(400).json({
+            error: "Email is already exists",
+          });
         }
+        return res.status(400).send(err);
+      }
 
-        res.send(user);
-      });
-    }
+      res.send(user);
+    });
+  }
 
-    const saveUser = user => {
-      user.save((err, user) => {
-        if (err) {
-          if (err.code === 11000) {
-            return res.status(400).json({
-              error: "Email is already exists",
-            });
-          }
-          return res.status(400).send(err);
+  const saveUser = user => {
+    user.save((err, user) => {
+      if (err) {
+        if (err.code === 11000) {
+          return res.status(400).json({
+            error: "Email is already exists",
+          });
         }
+        return res.status(400).send(err);
+      }
 
-        res.send(user);
-      });
-    };
-  
+      res.send(user);
+    });
+  };
 };
 
 exports.signin = (req, res) => {
@@ -110,16 +107,16 @@ exports.signin = (req, res) => {
 
     res.cookie("token", token, { expire: new Date() + 8900083774 });
 
-    const { _id, name, email, role } = user;
+    const { _id, name, email, role, avatar } = user;
 
     saveUserHistory({
       userId: _id,
       userHistory: {
         userActivity: USER_HISTORY_TYPES.USER_LOGGED_IN,
-        date: new Date()
-      }
-    })
-    
+        date: new Date(),
+      },
+    });
+
     return res.send({
       token,
       user: {
@@ -127,35 +124,35 @@ exports.signin = (req, res) => {
         name,
         email,
         role,
+        avatar,
       },
     });
-
   });
 };
 
-// exports.signInWithGoogle = async (req, res) => {
-//   const { token } = req.body;
+exports.signInWithGoogle = async (req, res) => {
+  const { token } = req.body;
 
-//   const ticket = await client.verifyIdToken({
-//     idToken: token,
-//     audience: process.env.CLIENT_ID,
-//   });
-//   const { name, email, picture } = ticket.getPayload();
-//   let user = await User.findOne({ email: email });
+  const ticket = await client.verifyIdToken({
+    idToken: token,
+    audience: process.env.CLIENT_ID,
+  });
+  const { name, email, picture } = ticket.getPayload();
+  let user = await User.findOne({ email: email });
 
-//   if (!user) {
-//     user = await new User({
-//       email,
-//       name,
-//       password: "123098777",
-//     });
+  if (!user) {
+    user = await new User({
+      email,
+      name,
+      password: "123098777",
+    });
 
-//     await user.save();
-//   }
+    await user.save();
+  }
 
-//   res.status(201);
-//   res.json({ token, user });
-// };
+  res.status(201);
+  res.json({ token, user });
+};
 
 exports.signout = (req, res) => {
   res.clearCookie("token");
@@ -170,9 +167,9 @@ exports.signout = (req, res) => {
     userId,
     userHistory: {
       userActivity: USER_HISTORY_TYPES.USER_LOGGED_OUT,
-      date: new Date()
-    }
-  })
+      date: new Date(),
+    },
+  });
 };
 
 exports.resetPassword = async (req, res) => {

@@ -497,15 +497,15 @@ exports.getProductsByFilter = async (req, res) => {
 
   let query = {};
 
-  if (req.body.category.length > 0) {
+  if (req.body.category?.length > 0) {
     query["category.name"] = { $in: req.body.category };
   }
 
-  if (req.body.brand.length > 0) {
+  if (req.body.brand?.length > 0) {
     query["brand.name"] = { $in: req.body.brand };
   }
 
-  if (req.body.size.length > 0) {
+  if (req.body.size?.length > 0) {
     query["size.name"] = { $in: req.body.size };
   }
 
