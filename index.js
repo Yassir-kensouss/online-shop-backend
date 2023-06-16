@@ -17,6 +17,7 @@ const orderRoutes = require("./routes/order");
 const statisticsRoutes = require("./routes/statistics");
 const generaleSettingsRoutes = require("./routes/generaleSettings");
 const carousalsSettingsRoutes = require("./routes/carousals");
+const reviewsRoutes = require("./routes/reviews");
 
 //Config App
 require("dotenv").config();
@@ -48,6 +49,7 @@ app.use("/api/file-storage", fileStorageRoutes);
 app.use("/api/statistics", statisticsRoutes);
 app.use("/api/settings", generaleSettingsRoutes);
 app.use("/api/settings/carousals", carousalsSettingsRoutes);
+app.use("/api/reviews", reviewsRoutes);
 
 app.get("/api/sse", (req, res) => {
   res.setHeader("Content-Type", "text/event-stream");

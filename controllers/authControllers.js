@@ -21,7 +21,7 @@ exports.signup = async (req, res) => {
     role: Joi.number(),
     avatar: Joi.string().allow("").optional(),
     address: Joi.object(),
-    phone: Joi.string(),
+    phone: Joi.string().optional(),
     mobile: Joi.string(),
   });
 

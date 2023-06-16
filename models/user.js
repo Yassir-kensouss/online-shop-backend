@@ -4,25 +4,25 @@ const { v1: uuid } = require("uuid");
 
 const addressSchema = new mongoose.Schema({
   country: {
-    type: Object
+    type: Object,
   },
   city: {
     type: String,
-    maxlength: 100
+    maxlength: 100,
   },
   state: {
     type: String,
-    maxlength: 100
+    maxlength: 100,
   },
   zipCode: {
     type: String,
-    maxlength: 50
+    maxlength: 50,
   },
   address: {
     type: String,
-    maxlength: 255
-  }
-})
+    maxlength: 255,
+  },
+});
 
 const userSchema = new mongoose.Schema(
   {
@@ -63,17 +63,17 @@ const userSchema = new mongoose.Schema(
     },
     state: {
       type: String,
-      default: 'active'
+      default: "active",
     },
     address: {
-      type: addressSchema
+      type: addressSchema,
     },
     phone: {
-      type: String
+      type: String,
     },
     mobile: {
-      type: String
-    }
+      type: String,
+    },
   },
   { timestamps: true }
 );
