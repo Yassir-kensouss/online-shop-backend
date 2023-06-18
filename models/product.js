@@ -75,14 +75,6 @@ const productSchema = new mongoose.Schema(
       type: Object,
       ref: "Brands",
     },
-    color: {
-      type: String,
-      required: true,
-    },
-    size: {
-      type: Object,
-      required: true,
-    },
     tags: [
       {
         type: String,
@@ -96,7 +88,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    variants: [variantSchema],
+    variants: {
+      type: Object,
+      required: true,
+    },
   },
   { timestamps: true }
 );

@@ -27,7 +27,8 @@ router.get("/most-used-categories", mostUsedCategories);
 router.get("/related/:productId", relatedProduct);
 router.get("/search", searchProduct);
 router.get("/productsList", searchProductByName);
-router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], createProduct);
+router.post("/create/:userId", createProduct);
+// router.post("/create/:userId", [requireSignIn, isAuth, isAdmin], createProduct);
 router.post(
   "/duplicate/:userId",
   [requireSignIn, isAuth, isAdmin],

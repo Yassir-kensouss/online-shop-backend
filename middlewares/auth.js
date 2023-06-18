@@ -1,37 +1,34 @@
-const expressJwt = require('express-jwt')
-require('dotenv').config()
+const expressJwt = require("express-jwt");
+require("dotenv").config();
 
 exports.requireSignIn = expressJwt({
-    secret: process.env.JWT_SECRET,
-    algorithms: ["HS256"],
-    userProperty: 'auth'
-})
+  secret: process.env.JWT_SECRET,
+  algorithms: ["HS256"],
+  userProperty: "auth",
+});
 
-exports.isAuth = (req,res,next) => {
+exports.isAuth = (req, res, next) => {
+  let user = req.profile && req.auth && req.profile._id == req.auth._id;
 
-    let user = req.profile && req.auth && (req.profile._id == req.auth._id)
+  if (req.auth.role == 1) {
+    return next();
+  }
 
-    if(req.auth.role == 1){
-        return next()
-    }
+  if (!user) {
+    return res.status(403).json({
+      error: "Access Denied",
+    });
+  }
 
-    if(!user){
-        return res.status(403).json({
-            error: 'Access Denied'
-        })
-    }
+  next();
+};
 
-    next()
-}
+exports.isAdmin = (req, res, next) => {
+  if (req.auth.role == 0) {
+    res.status(403).json({
+      error: "Admin resource, access denied",
+    });
+  }
 
-exports.isAdmin = (req,res, next) => {
-
-    if(req.auth.role == 0){
-        res.status(403).json({
-            error: 'Admin resource, access denied'
-        })
-    }
-
-    next()
-
-}
+  next();
+};

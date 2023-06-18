@@ -17,10 +17,8 @@ exports.createProduct = async (req, res) => {
     visibility: Joi.string().allow(null),
     category: Joi.object(),
     brand: Joi.object(),
-    color: Joi.string().required(),
-    size: Joi.object().required(),
     files: Joi.required(),
-    variants: Joi.array(),
+    variants: Joi.object(),
   });
 
   const validationError = validationSchema.validate(req.body);
@@ -190,8 +188,7 @@ exports.updateProduct = async (req, res) => {
     category: Joi.object(),
     brand: Joi.object(),
     photos: Joi.array().required(),
-    color: Joi.string().required(),
-    size: Joi.object().required(),
+    variants: Joi.object().required(),
   });
 
   const validationError = validationSchema.validate(req.body);
