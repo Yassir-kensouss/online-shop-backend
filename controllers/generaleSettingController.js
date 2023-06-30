@@ -8,6 +8,8 @@ exports.saveGeneraleSettings = (req, res) => {
       "https://res.cloudinary.com/djilpfqae/image/upload/v1681729139/logo2_sbcm0t.png",
     currency: "$",
     language: "english",
+    websiteDescription: "web site description",
+    websiteTitle: "web site title",
   };
 
   const generaleSetting = new GeneraleSetting(req.body);
@@ -33,15 +35,15 @@ exports.updateGeneraleSettings = async (req, res) => {
   if (req.body.brand) {
     const file = req.body.brand;
     result = await cloudinary.uploader.upload(file, {
-      crop: 'fill',
+      crop: "fill",
       width: 35, // set your desired width here
       height: 35, // set your desired height here
-      gravity: 'center',
-      format: 'jpg',
-      quality: 'auto',
+      gravity: "center",
+      format: "jpg",
+      quality: "auto",
       secure: true,
-      cropMode: 'limit',
-    })
+      cropMode: "limit",
+    });
   }
 
   GeneraleSetting.findOneAndUpdate(

@@ -1,12 +1,13 @@
 const { USER_HISTORY_TYPES } = require("../config/constants");
 const { Order } = require("../models/order");
 const { saveUserHistory } = require("./userController");
-const useragent = require('useragent');
-const DeviceDetector = require('node-device-detector');
+const useragent = require("useragent");
+const DeviceDetector = require("node-device-detector");
 
 exports.createOrder = async (req, res) => {
+  console.log("req.body", req.body);
 
-  const userAgent = useragent.parse(req.headers['user-agent']);
+  const userAgent = useragent.parse(req.headers["user-agent"]);
 
   const detector = new DeviceDetector({
     clientIndexes: true,
@@ -38,7 +39,7 @@ exports.createOrder = async (req, res) => {
       order,
     });
 
-    req.app.emit('new-order')
+    req.app.emit("new-order");
 
     saveUserHistory({
       userId: req.profile,
@@ -56,10 +57,10 @@ exports.fetchOrders = async (req, res) => {
   const page = req.query.page ? req.query.page : 1;
   const skip = limit * page;
   const count = await Order.countDocuments();
-  const newOrders = await Order.countDocuments({status: 'Not processed'});
-  const delivered = await Order.countDocuments({status: 'Delivered'});
-  const cancelled = await Order.countDocuments({status: 'Cancelled'});
-  const processing = await Order.countDocuments({status: 'Processing'});
+  const newOrders = await Order.countDocuments({ status: "Not processed" });
+  const delivered = await Order.countDocuments({ status: "Delivered" });
+  const cancelled = await Order.countDocuments({ status: "Cancelled" });
+  const processing = await Order.countDocuments({ status: "Processing" });
   Order.find()
     .skip(skip)
     .limit(limit)
@@ -78,7 +79,7 @@ exports.fetchOrders = async (req, res) => {
         newOrders,
         delivered,
         cancelled,
-        processing
+        processing,
       });
     });
 };

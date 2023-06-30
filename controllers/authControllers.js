@@ -10,6 +10,7 @@ const formidable = require("formidable");
 const { saveUserHistory } = require("./userController");
 const { USER_HISTORY_TYPES } = require("../config/constants");
 const client = new OAuth2Client(process.env.CLIENT_ID);
+const cookie = require("cookie");
 
 exports.signup = async (req, res) => {
   const validationSchema = Joi.object({
@@ -105,7 +106,17 @@ exports.signin = (req, res) => {
       process.env.JWT_SECRET
     );
 
-    res.cookie("token", token, { expire: new Date() + 8900083774 });
+    res.cookie("blahblah", token);
+
+    // const serialized = cookie.serialize("OurSiteJWT", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV !== "development",
+    //   sameSite: "strict",
+    //   maxAge: 60 * 60 * 24 * 30,
+    //   path: "/",
+    // });
+
+    // res.setHeader("Set-Cookie", serialized);
 
     const { _id, name, email, role, avatar } = user;
 
