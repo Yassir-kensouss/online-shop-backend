@@ -14,7 +14,11 @@ const { orderById } = require("../middlewares/order");
 const { updateProductStock } = require("../middlewares/product");
 const { userById } = require("../middlewares/user");
 
-router.post("/create/:userId", [requireSignIn, isAuth], createOrder);
+router.post(
+  "/create/:userId",
+  [requireSignIn, isAuth, updateProductStock],
+  createOrder
+);
 router.get("/:userId", [requireSignIn, isAuth, isAdmin], fetchOrders);
 router.get("/status/:userId", [requireSignIn, isAuth, isAdmin], getStatus);
 router.patch(
