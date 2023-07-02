@@ -34,16 +34,7 @@ exports.updateGeneraleSettings = async (req, res) => {
 
   if (req.body.brand) {
     const file = req.body.brand;
-    result = await cloudinary.uploader.upload(file, {
-      crop: "fill",
-      width: 35, // set your desired width here
-      height: 35, // set your desired height here
-      gravity: "center",
-      format: "jpg",
-      quality: "auto",
-      secure: true,
-      cropMode: "limit",
-    });
+    result = await cloudinary.uploader.upload(file);
   }
 
   GeneraleSetting.findOneAndUpdate(
