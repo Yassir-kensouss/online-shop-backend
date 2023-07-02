@@ -513,6 +513,11 @@ exports.getProductsByFilter = async (req, res) => {
     };
   }
 
+  if (req.body.search && req.body.search !== "") {
+    const matching = new RegExp(req.body.search, "i");
+    query["name"] = { $regex: matching };
+  }
+
   const total = await Product.countDocuments(query);
 
   Product.find(query)
