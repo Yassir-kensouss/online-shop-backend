@@ -15,8 +15,16 @@ router.get(
   [requireSignIn, isAuth, isAdmin],
   calculateRevenues
 );
-router.get("/revenue/interval", totalRevenueInterval);
-router.get("/traffic/browsers", browserTraffic);
+router.get(
+  "/revenue/interval",
+  [requireSignIn, isAuth, isAdmin],
+  totalRevenueInterval
+);
+router.get(
+  "/traffic/browsers",
+  [requireSignIn, isAuth, isAdmin],
+  browserTraffic
+);
 router.get("/traffic/device", deviceTraffic);
 router.get("/traffic/os", osTraffic);
 router.get("/traffic/countries", countriesTraffic);
