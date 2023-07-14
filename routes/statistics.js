@@ -6,10 +6,15 @@ const {
   browserTraffic,
   deviceTraffic,
   osTraffic,
-  countriesTraffic
+  countriesTraffic,
 } = require("../controllers/statisticsController");
+const { requireSignIn, isAuth, isAdmin } = require("../middlewares/auth");
 
-router.get("/total/revenues", calculateRevenues);
+router.get(
+  "/total/revenues",
+  [requireSignIn, isAuth, isAdmin],
+  calculateRevenues
+);
 router.get("/revenue/interval", totalRevenueInterval);
 router.get("/traffic/browsers", browserTraffic);
 router.get("/traffic/device", deviceTraffic);
