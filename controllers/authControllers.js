@@ -230,7 +230,3 @@ exports.updatePassword = async (req, res) => {
     res.send("Somthing went wrong!");
   }
 };
-
-exports.welcomePage = (req, res) => {
-  res.send("<h1>Hi, Welcome to my express js based API</h1>");
-};

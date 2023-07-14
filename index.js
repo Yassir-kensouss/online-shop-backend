@@ -18,6 +18,7 @@ const statisticsRoutes = require("./routes/statistics");
 const generaleSettingsRoutes = require("./routes/generaleSettings");
 const carousalsSettingsRoutes = require("./routes/carousals");
 const reviewsRoutes = require("./routes/reviews");
+const welcome = require("./routes/welcome");
 
 //Config App
 require("dotenv").config();
@@ -38,6 +39,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: "true" }));
 app.use(ip.mw());
 
 //Routes Middleware
+app.use("/", welcome);
 app.use("/api", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api/category", categoryRoutes);

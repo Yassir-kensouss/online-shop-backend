@@ -13,7 +13,6 @@ const { requireSignIn } = require("../middlewares/auth");
 const { signUpValidaor } = require("../middlewares/userValidator");
 const passport = require("passport");
 
-router.get("/", welcomePage);
 router.post("/signup", signup);
 router.post("/signin", signin);
 router.get("/signout/:userId", signout);
