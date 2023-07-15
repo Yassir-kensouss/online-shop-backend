@@ -16,7 +16,7 @@ const { userById } = require("../middlewares/user");
 
 router.post(
   "/create/:userId",
-  [requireSignIn, isAuth, updateProductStock],
+  // [requireSignIn, isAuth, updateProductStock],
   createOrder
 );
 router.get("/:userId", [requireSignIn, isAuth, isAdmin], fetchOrders);

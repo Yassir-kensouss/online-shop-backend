@@ -265,20 +265,33 @@ exports.osTraffic = (req, res) => {
 
 exports.countriesTraffic = (req, res) => {
   const pipeline = [
-    { $match: { country: { $exists: true, $ne: null } } },
-    { $group: { _id: "$country", count: { $sum: 1 } } },
+    {
+      $match: {
+        country: { $exists: true, $ne: null },
+      },
+    },
+    {
+      $group: {
+        _id: "$country",
+        count: { $sum: 1 },
+        address: {
+          $first: "$address.country_code",
+        },
+      },
+    },
     {
       $project: {
         _id: 0,
         country: "$_id",
         count: 1,
-        country_code: "$address.country_code",
+        country_code: "$address",
       },
     },
   ];
 
   Order.aggregate(pipeline, (err, result) => {
     if (err) {
+      console.log("err", err);
       return res.status(400).json({
         error: err,
       });
